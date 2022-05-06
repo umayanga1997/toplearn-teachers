@@ -46,6 +46,44 @@
                   outlined
                 ></v-combobox>
               </v-col>
+              <v-col cols="12" md="6" lg="6" sm="12" class="pa-0 ma-0"> </v-col>
+
+              <v-col cols="12" md="6" lg="6" sm="12" class="pa-0 ma-0">
+                <v-file-input
+                  v-model="noteFile"
+                  label="Note"
+                  outlined
+                  dense
+                  class="file-input"
+                  height="38"
+                ></v-file-input>
+                <p
+                  class="mt-2 green--text"
+                  v-if="
+                    editedItem.note_link != null && editedItem.note_link != ''
+                  "
+                >
+                  Already Uploaded
+                </p>
+              </v-col>
+              <v-col cols="12" md="6" lg="6" sm="12" class="pa-0 ma-0">
+                <v-file-input
+                  v-model="summaryFile"
+                  label="Summary"
+                  outlined
+                  class="file-input"
+                  dense
+                ></v-file-input>
+                <p
+                  class="mt-2 green--text"
+                  v-if="
+                    editedItem.summary_link != null &&
+                    editedItem.summary_link != ''
+                  "
+                >
+                  Already Uploaded
+                </p>
+              </v-col>
             </v-row>
           </v-container>
         </v-card-text>
@@ -125,6 +163,8 @@ export default {
     dialogType: "a",
     loading: false,
     btnLoading: false,
+    noteFile: null,
+    summaryFile: null,
     search: "",
     topicList: [],
     items: [],
@@ -141,6 +181,9 @@ export default {
   watch: {
     dialog(val) {
       val || this.close();
+    },
+    noteFile(value) {
+      console.log(value);
     },
   },
 
@@ -180,10 +223,14 @@ export default {
       this.dialogType = type;
       this.dialog = true;
     },
-    saveData() {
+    async saveData() {
       try {
         this.btnLoading = true;
         var id = uuid();
+
+        // Upload Files
+        if (this.noteFile != null) await this.uploadFiles("note");
+        if (this.summaryFile != null) await this.uploadFiles("summary");
 
         videosRef
           .doc(id)
@@ -193,9 +240,12 @@ export default {
             subject: "",
             teacher_id: "",
             medium: "",
+            medium: "",
             topic: this.editedItem?.topic,
             description: this.editedItem?.description,
             video_link: this.editedItem?.video_link,
+            note_link: this.editedItem?.note_link ?? "",
+            summary_link: this.editedItem?.summary_link ?? "",
             create_date: new Date(),
           })
           .then(() => {
@@ -210,15 +260,22 @@ export default {
         this.btnLoading = false;
       }
     },
-    updateData() {
+    async updateData() {
       try {
         this.btnLoading = true;
+
+        // Upload Files
+        if (this.noteFile != null) await this.uploadFiles("note");
+        if (this.summaryFile != null) await this.uploadFiles("summary");
+
         videosRef
           .doc(this.editedItem.id)
           .update({
             topic: this.editedItem?.topic,
             video_link: this.editedItem?.video_link,
             description: this.editedItem?.description,
+            note_link: this.editedItem?.note_link ?? "",
+            summary_link: this.editedItem?.summary_link ?? "",
             last_update_date: new Date(),
           })
           .then(() => {
@@ -238,6 +295,18 @@ export default {
         videosRef
           .doc(this.editedItem.id)
           .delete()
+          .then(async () => {
+            if (
+              // this.editedItem?.note_link == null ||
+              this.editedItem?.note_link != ""
+            )
+              await this.deleteFiles(this.editedItem.note_link);
+            if (
+              // this.editedItem?.summary_link == null ||
+              this.editedItem?.summary_link != ""
+            )
+              await this.deleteFiles(this.editedItem.summary_link);
+          })
           .then(() => {
             this.$store.dispatch("alertState/message", [
               "Data deleted successfully.",
@@ -246,6 +315,29 @@ export default {
             this.btnLoading = false;
             this.close();
           });
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async uploadFiles(fileType) {
+      try {
+        if (fileType === "note") {
+          await this.deleteFiles(this.editedItem.note_link);
+          // Upload File
+        }
+        if (fileType === "summary") {
+          await this.deleteFiles(this.editedItem.summary_link);
+          // Upload File
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async deleteFiles(url) {
+      try {
+        if (url != null && url != "") {
+          // Delete File
+        }
       } catch (error) {
         console.log(error);
       }
@@ -261,4 +353,7 @@ export default {
 </script>
 
 <style lang="scss">
+.file-input {
+  max-height: 38px;
+}
 </style>
