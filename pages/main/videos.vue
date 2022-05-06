@@ -10,7 +10,7 @@
       />
     </v-row>
 
-    <v-dialog v-model="dialog" max-width="600px">
+    <v-dialog persistent v-model="dialog" max-width="600px">
       <v-card v-if="dialogType != 'd'">
         <v-card-title>
           <span class="text-h5">{{ formTitle }}</span>
@@ -38,13 +38,13 @@
                 ></v-textarea>
               </v-col>
               <v-col cols="12" md="6" lg="6" sm="12" class="pa-0 ma-0">
-                <v-combobox
+                <v-select
                   :items="topicList"
                   v-model="editedItem.topic"
                   label="Topic"
                   dense
                   outlined
-                ></v-combobox>
+                ></v-select>
               </v-col>
               <v-col cols="12" md="6" lg="6" sm="12" class="pa-0 ma-0"> </v-col>
 
@@ -155,6 +155,8 @@
 import { v4 as uuid } from "uuid";
 var videosRef;
 var topicsRef;
+var storageRefNote;
+var storageRefSummary;
 
 export default {
   name: "videos_screen",
@@ -190,6 +192,8 @@ export default {
   created() {
     videosRef = this.$fire.firestore.collection("videos");
     topicsRef = this.$fire.firestore.collection("topics");
+    storageRefNote = this.$fire.storage.ref("notes/");
+    storageRefSummary = this.$fire.storage.ref("summaries/");
     this.initialize();
   },
 
@@ -208,8 +212,9 @@ export default {
           .where("grade", "==", "")
           .where("subject", "==", "")
           .onSnapshot((querySnapshot) => {
+            this.topicList = [];
             querySnapshot.docs.forEach((doc) => {
-              this.topicList.push(doc.data());
+              this.topicList.push(doc.data()["topic"]);
             });
           });
       } catch (error) {
@@ -225,36 +230,72 @@ export default {
     },
     async saveData() {
       try {
-        this.btnLoading = true;
-        var id = uuid();
+        if (
+          this.editedItem.video_link == null ||
+          this.editedItem.video_link == ""
+        ) {
+          this.$store.dispatch("alertState/message", [
+            "Please enter Video Link",
+            "error",
+          ]);
+        } else if (
+          this.editedItem.description == null ||
+          this.editedItem.description == ""
+        ) {
+          this.$store.dispatch("alertState/message", [
+            "Please enter Description",
+            "error",
+          ]);
+        } else if (
+          this.editedItem.topic == null ||
+          this.editedItem.topic == ""
+        ) {
+          this.$store.dispatch("alertState/message", [
+            "Please select Topic of Subject",
+            "error",
+          ]);
+        } else if (this.noteFile == null) {
+          this.$store.dispatch("alertState/message", [
+            "Please enter Note File",
+            "error",
+          ]);
+        } else if (this.summaryFile == null) {
+          this.$store.dispatch("alertState/message", [
+            "Please enter Summary File",
+            "error",
+          ]);
+        } else {
+          this.btnLoading = true;
+          var id = uuid();
 
-        // Upload Files
-        if (this.noteFile != null) await this.uploadFiles("note");
-        if (this.summaryFile != null) await this.uploadFiles("summary");
+          // Upload Files
+          if (this.noteFile != null) await this.uploadFiles("note");
+          if (this.summaryFile != null) await this.uploadFiles("summary");
 
-        videosRef
-          .doc(id)
-          .set({
-            id: id,
-            grade: "",
-            subject: "",
-            teacher_id: "",
-            medium: "",
-            medium: "",
-            topic: this.editedItem?.topic,
-            description: this.editedItem?.description,
-            video_link: this.editedItem?.video_link,
-            note_link: this.editedItem?.note_link ?? "",
-            summary_link: this.editedItem?.summary_link ?? "",
-            create_date: new Date(),
-          })
-          .then(() => {
-            this.$store.dispatch("alertState/message", [
-              "Data added successfully.",
-              "success",
-            ]);
-            this.btnLoading = false;
-          });
+          videosRef
+            .doc(id)
+            .set({
+              id: id,
+              grade: "",
+              subject: "",
+              teacher_id: "",
+              medium: "",
+              medium: "",
+              topic: this.editedItem?.topic,
+              description: this.editedItem?.description,
+              video_link: this.editedItem?.video_link,
+              note_link: this.editedItem?.note_link ?? "",
+              summary_link: this.editedItem?.summary_link ?? "",
+              create_date: new Date(),
+            })
+            .then(() => {
+              this.$store.dispatch("alertState/message", [
+                "Data added successfully.",
+                "success",
+              ]);
+              this.btnLoading = false;
+            });
+        }
       } catch (error) {
         console.log(error);
         this.btnLoading = false;
@@ -262,29 +303,55 @@ export default {
     },
     async updateData() {
       try {
-        this.btnLoading = true;
+        if (
+          this.editedItem.video_link == null ||
+          this.editedItem.video_link == ""
+        ) {
+          this.$store.dispatch("alertState/message", [
+            "Please enter Video Link",
+            "error",
+          ]);
+        } else if (
+          this.editedItem.description == null ||
+          this.editedItem.description == ""
+        ) {
+          this.$store.dispatch("alertState/message", [
+            "Please enter Description",
+            "error",
+          ]);
+        } else if (
+          this.editedItem.topic == null ||
+          this.editedItem.topic == ""
+        ) {
+          this.$store.dispatch("alertState/message", [
+            "Please select Topic of Subject",
+            "error",
+          ]);
+        } else {
+          this.btnLoading = true;
 
-        // Upload Files
-        if (this.noteFile != null) await this.uploadFiles("note");
-        if (this.summaryFile != null) await this.uploadFiles("summary");
+          // Upload Files
+          if (this.noteFile != null) await this.uploadFiles("note");
+          if (this.summaryFile != null) await this.uploadFiles("summary");
 
-        videosRef
-          .doc(this.editedItem.id)
-          .update({
-            topic: this.editedItem?.topic,
-            video_link: this.editedItem?.video_link,
-            description: this.editedItem?.description,
-            note_link: this.editedItem?.note_link ?? "",
-            summary_link: this.editedItem?.summary_link ?? "",
-            last_update_date: new Date(),
-          })
-          .then(() => {
-            this.$store.dispatch("alertState/message", [
-              "Data updated successfully.",
-              "success",
-            ]);
-            this.btnLoading = false;
-          });
+          videosRef
+            .doc(this.editedItem.id)
+            .update({
+              topic: this.editedItem?.topic,
+              video_link: this.editedItem?.video_link,
+              description: this.editedItem?.description,
+              note_link: this.editedItem?.note_link ?? "",
+              summary_link: this.editedItem?.summary_link ?? "",
+              last_update_date: new Date(),
+            })
+            .then(() => {
+              this.$store.dispatch("alertState/message", [
+                "Data updated successfully.",
+                "success",
+              ]);
+              this.btnLoading = false;
+            });
+        }
       } catch (error) {
         console.log(error);
       }
@@ -324,10 +391,20 @@ export default {
         if (fileType === "note") {
           await this.deleteFiles(this.editedItem.note_link);
           // Upload File
+          var id = uuid();
+          const value = await storageRefNote
+            .child(`Note_File_${id}`)
+            .put(this.noteFile);
+          this.editedItem.note_link = value.ref.getDownloadURL();
         }
         if (fileType === "summary") {
           await this.deleteFiles(this.editedItem.summary_link);
           // Upload File
+          var id = uuid();
+          const value = await storageRefSummary
+            .child(`Summary_File_${id}`)
+            .put(this.summaryFile);
+          this.editedItem.summary_link = value.ref.getDownloadURL();
         }
       } catch (error) {
         console.log(error);
@@ -337,6 +414,12 @@ export default {
       try {
         if (url != null && url != "") {
           // Delete File
+          await this.$fire.storage
+            .refFromURL(url)
+            .delete()
+            .catch((e) => {
+              this.$store.dispatch("alertState/message", [e, "error"]);
+            });
         }
       } catch (error) {
         console.log(error);

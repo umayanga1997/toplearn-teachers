@@ -67,13 +67,13 @@
         </v-card-title>
         <v-card-text>
           <v-row class="mt-5">
-            <v-col>
+            <!-- <v-col>
               <v-select :items="items" label="Grade" dense outlined></v-select>
-            </v-col>
+            </v-col> -->
             <v-col>
               <v-select
-                :items="items"
-                label="Subject"
+                :items="topicList"
+                label="Topics"
                 dense
                 outlined
               ></v-select>
@@ -99,6 +99,8 @@ import videospage from "@/pages/main/videos.vue";
 import tests from "@/pages/main/tests.vue";
 import onlineclass from "~/pages/main/live-class.vue";
 
+var topicsRef;
+
 export default {
   name: "DefaultLayout",
   components: {
@@ -110,10 +112,39 @@ export default {
     return {
       tab: null,
       items: ["Videos", "Tests", "Live Class"],
+      topicList: [],
+      topicListData: [],
       drawer: false,
+      loading: false,
       show: false,
       filterDialog: false,
     };
+  },
+  created() {
+    topicsRef = this.$fire.firestore.collection("topics");
+    this.initialize();
+  },
+  methods: {
+    initialize() {
+      try {
+        this.loading = true;
+        topicsRef
+          .where("grade", "==", "")
+          .where("subject", "==", "")
+          .onSnapshot((querySnapshot) => {
+            this.topicList = [];
+            this.topicListData = [];
+            querySnapshot.docs.forEach((doc) => {
+              this.topicList.push(doc.data()["topic"]);
+              this.topicListData.push(doc.data());
+            });
+            this.loading = false;
+          });
+      } catch (error) {
+        console.log(error);
+        this.loading = false;
+      }
+    },
   },
 };
 </script>
