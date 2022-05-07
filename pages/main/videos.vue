@@ -26,17 +26,6 @@
                   outlined
                 ></v-text-field>
               </v-col>
-              <v-col cols="12">
-                <v-textarea
-                  v-model="editedItem.description"
-                  label="Description"
-                  dense
-                  height="110"
-                  outlined
-                  class="text-area-max-height"
-                  no-resize
-                ></v-textarea>
-              </v-col>
               <v-col cols="12" md="6" lg="6" sm="12">
                 <v-select
                   :items="topicList"
@@ -54,6 +43,18 @@
                   outlined
                 ></v-text-field>
               </v-col>
+              <v-col cols="12">
+                <v-textarea
+                  v-model="editedItem.description"
+                  label="Description"
+                  dense
+                  height="110"
+                  outlined
+                  class="text-area-max-height"
+                  no-resize
+                ></v-textarea>
+              </v-col>
+
               <v-col cols="12" md="6" lg="6" sm="12">
                 <v-file-input
                   v-model="noteFile"
