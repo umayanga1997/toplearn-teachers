@@ -1,17 +1,15 @@
 <template>
   <v-col cols="12" md="6" lg="3" sm="6" xl="2" class="ma-0 pa-0">
     <v-card>
-      <v-row justify="space-between" align="center" class="pr-5 pt-4 ma-0">
-        <v-card-title class="pb-0 pt-0"> Top western road trips </v-card-title>
-        <v-btn icon><v-icon color="red">mdi-delete</v-icon></v-btn>
-      </v-row>
-
-      <v-card-subtitle class="pb-0 pt-0">
-        1,000 miles of wonder
-      </v-card-subtitle>
+      <v-card-title class="pb-0 pt-2"> {{ item.topic }} </v-card-title>
 
       <v-card-actions>
-        <!-- <v-btn color="orange lighten-3" text> Explore </v-btn> -->
+        <v-btn @click="deleteF()" icon color="red lighten-3">
+          <v-icon>mdi-delete</v-icon>
+        </v-btn>
+        <v-btn @click="edit()" icon color="green darlen-3">
+          <v-icon>mdi-pencil</v-icon>
+        </v-btn>
 
         <v-spacer></v-spacer>
 
@@ -26,13 +24,17 @@
 
           <v-card-text>
             <v-col class="ma-0 pa-0">
+              <span class="title-text">Link</span>
+              <p class="subtitle-text">{{ item.link }}</p>
+            </v-col>
+            <v-col class="ma-0 pa-0 pt-2">
               <span class="title-text">Date & Time</span>
-              <p class="subtitle-text ma-0">2022-10-11</p>
-              <p class="subtitle-text">01.30 PM</p>
+              <p class="subtitle-text ma-0">{{ item.schedule_date }}</p>
+              <p class="subtitle-text">{{ item.schedule_time }}</p>
             </v-col>
             <v-col class="ma-0 pa-0 pt-2">
               <span class="title-text">Teacher</span>
-              <p class="subtitle-text">Mr.Lochana Ranasinghe</p>
+              <p class="subtitle-text">{{ item.teacher_name }}</p>
             </v-col>
             <v-col class="ma-0 pa-0 pt-2">
               <p class="title-text ma-0 pa-0">
@@ -49,10 +51,19 @@
 <script>
 export default {
   name: "online-card-compo",
+  props: ["item"],
   data() {
     return {
       show: false,
     };
+  },
+  methods: {
+    edit() {
+      this.$emit("editFunction");
+    },
+    deleteF() {
+      this.$emit("deleteFunction");
+    },
   },
 };
 </script>
