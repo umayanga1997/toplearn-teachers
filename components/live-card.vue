@@ -5,6 +5,8 @@
 
       <p class="pl-4 pr-4 mt-4">Rs. {{ item.price }}/=</p>
 
+      <p class="pl-4 pr-4 mt-4 pink">Count of Enrolment : {{ enrolCount }}</p>
+
       <v-card-actions>
         <v-btn @click="deleteF()" icon color="red lighten-3">
           <v-icon>mdi-delete</v-icon>
@@ -57,6 +59,7 @@ export default {
   data() {
     return {
       show: false,
+      enrolCount: 0,
     };
   },
   methods: {

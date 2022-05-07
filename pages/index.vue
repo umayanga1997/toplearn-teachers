@@ -66,7 +66,7 @@
           <span class="text-h5">Filter</span>
         </v-card-title>
         <v-card-text>
-          <v-row class="mt-5">
+          <v-row class="mt-1">
             <!-- <v-col>
               <v-select :items="items" label="Grade" dense outlined></v-select>
             </v-col> -->

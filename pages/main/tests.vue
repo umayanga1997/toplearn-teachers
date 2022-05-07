@@ -1,13 +1,13 @@
 <template>
   <div>
     <v-row justify="center" class="ma-0 pa-0 card-section" dense>
-      <!-- <test-card
+      <test-card
         v-for="item in items"
         :key="item.id"
         :item="item"
         @editFunction="dialogAction(item, 'e')"
         @deleteFunction="dialogAction(item, 'd')"
-      /> -->
+      />
     </v-row>
 
     <v-dialog persistent v-model="dialog" max-width="600px">
@@ -18,15 +18,24 @@
         <v-card-text>
           <v-container>
             <v-row>
-              <v-col cols="12" class="pa-0 ma-0 mt-3">
+              <v-col cols="12" md="6" lg="6" sm="12">
+                <v-select
+                  :items="topicList"
+                  v-model="editedItem.topic"
+                  label="Topic"
+                  dense
+                  outlined
+                ></v-select>
+              </v-col>
+              <v-col cols="12" md="6" lg="6" sm="12">
                 <v-text-field
-                  v-model="editedItem.video_link"
-                  label="Video Link"
+                  v-model="editedItem.price"
+                  label="Price"
                   dense
                   outlined
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" class="pa-0 ma-0">
+              <v-col cols="12">
                 <v-textarea
                   v-model="editedItem.description"
                   label="Description"
@@ -36,53 +45,6 @@
                   height="110"
                   no-resize
                 ></v-textarea>
-              </v-col>
-              <v-col cols="12" md="6" lg="6" sm="12" class="pa-0 ma-0">
-                <v-select
-                  :items="topicList"
-                  v-model="editedItem.topic"
-                  label="Topic"
-                  dense
-                  outlined
-                ></v-select>
-              </v-col>
-              <v-col cols="12" md="6" lg="6" sm="12" class="pa-0 ma-0"> </v-col>
-
-              <v-col cols="12" md="6" lg="6" sm="12" class="pa-0 ma-0">
-                <v-file-input
-                  v-model="noteFile"
-                  label="Note"
-                  outlined
-                  dense
-                  class="file-input"
-                  height="38"
-                ></v-file-input>
-                <p
-                  class="mt-2 green--text"
-                  v-if="
-                    editedItem.note_link != null && editedItem.note_link != ''
-                  "
-                >
-                  Already Uploaded
-                </p>
-              </v-col>
-              <v-col cols="12" md="6" lg="6" sm="12" class="pa-0 ma-0">
-                <v-file-input
-                  v-model="summaryFile"
-                  label="Summary"
-                  outlined
-                  class="file-input"
-                  dense
-                ></v-file-input>
-                <p
-                  class="mt-2 green--text"
-                  v-if="
-                    editedItem.summary_link != null &&
-                    editedItem.summary_link != ''
-                  "
-                >
-                  Already Uploaded
-                </p>
               </v-col>
             </v-row>
           </v-container>
@@ -154,10 +116,8 @@
 <script>
 import { v4 as uuid } from "uuid";
 import testCard from "~/components/test-card.vue";
-var videosRef;
+var testsRef;
 var topicsRef;
-var storageRefNote;
-var storageRefSummary;
 
 export default {
   components: { testCard },
@@ -167,8 +127,6 @@ export default {
     dialogType: "a",
     loading: false,
     btnLoading: false,
-    noteFile: null,
-    summaryFile: null,
     search: "",
     topicList: [],
     items: [],
@@ -189,10 +147,9 @@ export default {
   },
 
   created() {
-    videosRef = this.$fire.firestore.collection("videos");
+    testsRef = this.$fire.firestore.collection("tests");
     topicsRef = this.$fire.firestore.collection("topics");
-    storageRefNote = this.$fire.storage.ref("notes/");
-    storageRefSummary = this.$fire.storage.ref("summaries/");
+
     this.initialize();
   },
 
@@ -200,7 +157,7 @@ export default {
     initialize() {
       try {
         this.loading = true;
-        videosRef.onSnapshot((querySnapshot) => {
+        testsRef.where("teacher_id", "==", "").onSnapshot((querySnapshot) => {
           this.items = [];
           querySnapshot.docs.forEach((doc) => {
             this.items.push(doc.data());
@@ -229,12 +186,18 @@ export default {
     },
     async saveData() {
       try {
-        if (
-          this.editedItem.video_link == null ||
-          this.editedItem.video_link == ""
+        if (this.editedItem.topic == null || this.editedItem.topic == "") {
+          this.$store.dispatch("alertState/message", [
+            "Please select Topic of Subject",
+            "error",
+          ]);
+        } else if (
+          this.editedItem.price == null ||
+          this.editedItem.price == "" ||
+          Number(this.editedItem.price ?? 0) <= 0
         ) {
           this.$store.dispatch("alertState/message", [
-            "Please enter Video Link",
+            "Please enter Price",
             "error",
           ]);
         } else if (
@@ -245,33 +208,11 @@ export default {
             "Please enter Description",
             "error",
           ]);
-        } else if (
-          this.editedItem.topic == null ||
-          this.editedItem.topic == ""
-        ) {
-          this.$store.dispatch("alertState/message", [
-            "Please select Topic of Subject",
-            "error",
-          ]);
-        } else if (this.noteFile == null) {
-          this.$store.dispatch("alertState/message", [
-            "Please enter Note File",
-            "error",
-          ]);
-        } else if (this.summaryFile == null) {
-          this.$store.dispatch("alertState/message", [
-            "Please enter Summary File",
-            "error",
-          ]);
         } else {
           this.btnLoading = true;
           var id = uuid();
 
-          // Upload Files
-          if (this.noteFile != null) await this.uploadFiles("note");
-          if (this.summaryFile != null) await this.uploadFiles("summary");
-
-          videosRef
+          testsRef
             .doc(id)
             .set({
               id: id,
@@ -279,12 +220,9 @@ export default {
               subject: "",
               teacher_id: "",
               medium: "",
-              medium: "",
               topic: this.editedItem?.topic,
+              price: Number(this.editedItem?.price),
               description: this.editedItem?.description,
-              video_link: this.editedItem?.video_link,
-              note_link: this.editedItem?.note_link,
-              summary_link: this.editedItem?.summary_link,
               create_date: new Date(),
             })
             .then(() => {
@@ -304,14 +242,6 @@ export default {
     async updateData() {
       try {
         if (
-          this.editedItem.video_link == null ||
-          this.editedItem.video_link == ""
-        ) {
-          this.$store.dispatch("alertState/message", [
-            "Please enter Video Link",
-            "error",
-          ]);
-        } else if (
           this.editedItem.description == null ||
           this.editedItem.description == ""
         ) {
@@ -320,28 +250,23 @@ export default {
             "error",
           ]);
         } else if (
-          this.editedItem.topic == null ||
-          this.editedItem.topic == ""
+          this.editedItem.price == null ||
+          this.editedItem.price == "" ||
+          Number(this.editedItem.price ?? 0) <= 0
         ) {
           this.$store.dispatch("alertState/message", [
-            "Please select Topic of Subject",
+            "Please enter Price",
             "error",
           ]);
         } else {
           this.btnLoading = true;
 
-          // Upload Files
-          if (this.noteFile != null) await this.uploadFiles("note");
-          if (this.summaryFile != null) await this.uploadFiles("summary");
-
-          videosRef
+          testsRef
             .doc(this.editedItem.id)
             .update({
               topic: this.editedItem?.topic,
-              video_link: this.editedItem?.video_link,
+              price: Number(this.editedItem?.price),
               description: this.editedItem?.description,
-              note_link: this.editedItem?.note_link,
-              summary_link: this.editedItem?.summary_link,
               last_update_date: new Date(),
             })
             .then(() => {
@@ -360,21 +285,9 @@ export default {
     deleteData() {
       try {
         this.btnLoading = true;
-        videosRef
+        testsRef
           .doc(this.editedItem.id)
           .delete()
-          .then(async () => {
-            if (
-              // this.editedItem?.note_link == null ||
-              this.editedItem?.note_link != ""
-            )
-              await this.deleteFiles(this.editedItem.note_link);
-            if (
-              // this.editedItem?.summary_link == null ||
-              this.editedItem?.summary_link != ""
-            )
-              await this.deleteFiles(this.editedItem.summary_link);
-          })
           .then(() => {
             this.$store.dispatch("alertState/message", [
               "Data deleted successfully.",
@@ -383,49 +296,6 @@ export default {
             this.btnLoading = false;
             this.close();
           });
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    async uploadFiles(fileType) {
-      try {
-        if (fileType === "note") {
-          await this.deleteFiles(this.editedItem.note_link);
-          // Upload File
-          var id = uuid();
-          const value = await storageRefNote
-            .child(`Note_File_${id}_${this.noteFile.name}`)
-            .put(this.noteFile);
-          await value.ref.getDownloadURL().then((url) => {
-            this.editedItem.note_link = url;
-          });
-        }
-        if (fileType === "summary") {
-          await this.deleteFiles(this.editedItem.summary_link);
-          // Upload File
-          var id = uuid();
-          const value = await storageRefSummary
-            .child(`Summary_File_${id}_${this.summaryFile.name}`)
-            .put(this.summaryFile);
-          await value.ref.getDownloadURL().then((url) => {
-            this.editedItem.summary_link = url;
-          });
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    async deleteFiles(url) {
-      try {
-        if (url != null && url != "") {
-          // Delete File
-          await this.$fire.storage
-            .refFromURL(url)
-            .delete()
-            .catch((e) => {
-              this.$store.dispatch("alertState/message", [e, "error"]);
-            });
-        }
       } catch (error) {
         console.log(error);
       }
