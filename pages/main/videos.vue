@@ -18,7 +18,7 @@
         <v-card-text>
           <v-container>
             <v-row>
-              <v-col cols="12" class="pa-0 ma-0 mt-3">
+              <v-col cols="12">
                 <v-text-field
                   v-model="editedItem.video_link"
                   label="Video Link"
@@ -26,18 +26,18 @@
                   outlined
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" class="pa-0 ma-0">
+              <v-col cols="12">
                 <v-textarea
                   v-model="editedItem.description"
                   label="Description"
                   dense
+                  height="110"
                   outlined
                   class="text-area-max-height"
-                  height="110"
                   no-resize
                 ></v-textarea>
               </v-col>
-              <v-col cols="12" md="6" lg="6" sm="12" class="pa-0 ma-0">
+              <v-col cols="12" md="6" lg="6" sm="12">
                 <v-select
                   :items="topicList"
                   v-model="editedItem.topic"
@@ -46,9 +46,15 @@
                   outlined
                 ></v-select>
               </v-col>
-              <v-col cols="12" md="6" lg="6" sm="12" class="pa-0 ma-0"> </v-col>
-
-              <v-col cols="12" md="6" lg="6" sm="12" class="pa-0 ma-0">
+              <v-col cols="12" md="6" lg="6" sm="12">
+                <v-text-field
+                  v-model="editedItem.price"
+                  label="Price"
+                  dense
+                  outlined
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="6" lg="6" sm="12">
                 <v-file-input
                   v-model="noteFile"
                   label="Note"
@@ -66,7 +72,7 @@
                   Already Uploaded
                 </p>
               </v-col>
-              <v-col cols="12" md="6" lg="6" sm="12" class="pa-0 ma-0">
+              <v-col cols="12" md="6" lg="6" sm="12">
                 <v-file-input
                   v-model="summaryFile"
                   label="Summary"
@@ -251,6 +257,15 @@ export default {
             "Please select Topic of Subject",
             "error",
           ]);
+        } else if (
+          this.editedItem.price == null ||
+          this.editedItem.price == "" ||
+          Number(this.editedItem.price ?? 0) <= 0
+        ) {
+          this.$store.dispatch("alertState/message", [
+            "Please enter Price",
+            "error",
+          ]);
         } else if (this.noteFile == null) {
           this.$store.dispatch("alertState/message", [
             "Please enter Note File",
@@ -280,6 +295,7 @@ export default {
               medium: "",
               topic: this.editedItem?.topic,
               description: this.editedItem?.description,
+              price: Number(this.editedItem?.price),
               video_link: this.editedItem?.video_link,
               note_link: this.editedItem?.note_link,
               summary_link: this.editedItem?.summary_link,
@@ -318,11 +334,12 @@ export default {
             "error",
           ]);
         } else if (
-          this.editedItem.topic == null ||
-          this.editedItem.topic == ""
+          this.editedItem.price == null ||
+          this.editedItem.price == "" ||
+          Number(this.editedItem.price ?? 0) <= 0
         ) {
           this.$store.dispatch("alertState/message", [
-            "Please select Topic of Subject",
+            "Please enter Price",
             "error",
           ]);
         } else {
@@ -338,6 +355,7 @@ export default {
               topic: this.editedItem?.topic,
               video_link: this.editedItem?.video_link,
               description: this.editedItem?.description,
+              price: Number(this.editedItem?.price),
               note_link: this.editedItem?.note_link,
               summary_link: this.editedItem?.summary_link,
               last_update_date: new Date(),

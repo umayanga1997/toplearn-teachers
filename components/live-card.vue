@@ -3,6 +3,8 @@
     <v-card>
       <v-card-title class="pb-0 pt-2"> {{ item.topic }} </v-card-title>
 
+      <p class="pl-4 pr-4 mt-4">Rs. {{ item.price }}/=</p>
+
       <v-card-actions>
         <v-btn @click="deleteF()" icon color="red lighten-3">
           <v-icon>mdi-delete</v-icon>
@@ -36,12 +38,12 @@
               <span class="title-text">Teacher</span>
               <p class="subtitle-text">{{ item.teacher_name }}</p>
             </v-col>
-            <v-col class="ma-0 pa-0 pt-2">
+            <!-- <v-col class="ma-0 pa-0 pt-2">
               <p class="title-text ma-0 pa-0">
                 Your can request to a live class
               </p>
               <v-btn class="green darken-2 mt-2">Request </v-btn>
-            </v-col>
+            </v-col> -->
           </v-card-text>
         </div>
       </v-expand-transition>

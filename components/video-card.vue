@@ -17,6 +17,9 @@
       <v-card-title> {{ item.topic }} </v-card-title>
 
       <v-card-subtitle> {{ item.description }} </v-card-subtitle>
+
+      <p class="pl-3 pr-3">Rs. {{ item.price }}/=</p>
+
       <v-container class="download-class">
         <a :href="item.note_link" download>
           <v-icon>mdi-download</v-icon> <span>Note</span>

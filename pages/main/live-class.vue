@@ -17,13 +17,7 @@
         <v-card-text>
           <v-container>
             <v-row>
-              <v-col
-                cols="12"
-                md="6"
-                lg="6"
-                sm="12"
-                class="pa-0 ma-0 pr-1 mt-3"
-              >
+              <v-col cols="12" md="6" lg="6" sm="12">
                 <v-menu
                   v-model="dateMenu"
                   :close-on-content-click="false"
@@ -50,13 +44,7 @@
                   ></v-date-picker>
                 </v-menu>
               </v-col>
-              <v-col
-                cols="12"
-                md="6"
-                lg="6"
-                sm="12"
-                class="pa-0 ma-0 pl-1 mt-3"
-              >
+              <v-col cols="12" md="6" lg="6" sm="12">
                 <v-menu
                   v-model="timeMenu"
                   :close-on-content-click="false"
@@ -83,7 +71,7 @@
                   ></v-time-picker>
                 </v-menu>
               </v-col>
-              <v-col cols="12" md="6" lg="6" sm="12" class="pa-0 ma-0">
+              <v-col cols="12" md="6" lg="6" sm="12">
                 <v-select
                   :items="topicList"
                   v-model="editedItem.topic"
@@ -92,7 +80,15 @@
                   outlined
                 ></v-select>
               </v-col>
-              <v-col cols="12" class="pa-0 ma-0">
+              <v-col cols="12" md="6" lg="6" sm="12">
+                <v-text-field
+                  v-model="editedItem.price"
+                  label="Price"
+                  dense
+                  outlined
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
                 <v-text-field
                   v-model="editedItem.link"
                   label="Link"
@@ -263,6 +259,15 @@ export default {
             "Please select Topic",
             "error",
           ]);
+        } else if (
+          this.editedItem.price == null ||
+          this.editedItem.price == "" ||
+          Number(this.editedItem.price ?? 0) <= 0
+        ) {
+          this.$store.dispatch("alertState/message", [
+            "Please enter Price",
+            "error",
+          ]);
         } else if (this.editedItem.link == null || this.editedItem.link == "") {
           this.$store.dispatch("alertState/message", [
             "Please enter Link",
@@ -280,6 +285,7 @@ export default {
               teacher_id: "",
               teacher_name: "",
               topic: this.editedItem.topic,
+              price: Number(this.editedItem?.price),
               medium: "",
               link: this.editedItem.link,
               schedule_date: this.editedItem.schedule_date,
@@ -306,6 +312,15 @@ export default {
             "Please enter Link",
             "error",
           ]);
+        } else if (
+          this.editedItem.price == null ||
+          this.editedItem.price == "" ||
+          Number(this.editedItem.price ?? 0) <= 0
+        ) {
+          this.$store.dispatch("alertState/message", [
+            "Please enter Price",
+            "error",
+          ]);
         } else {
           this.btnLoading = true;
           liveClassRef
@@ -316,6 +331,7 @@ export default {
               teacher_id: "",
               teacher_name: "",
               topic: this.editedItem.topic,
+              price: Number(this.editedItem?.price),
               medium: "",
               link: this.editedItem.link,
               schedule_date: this.editedItem.schedule_date,

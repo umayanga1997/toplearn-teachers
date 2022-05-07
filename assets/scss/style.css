@@ -1,1 +1,8 @@
-/* No CSS *//*# sourceMappingURL=style.css.map */
+.v-input {
+  max-height: 38px !important;
+}
+
+.text-area-max-height {
+  max-height: 110px !important;
+}
+/*# sourceMappingURL=style.css.map */
