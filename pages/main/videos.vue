@@ -184,9 +184,6 @@ export default {
     dialog(val) {
       val || this.close();
     },
-    noteFile(value) {
-      console.log(value);
-    },
   },
 
   created() {
@@ -284,8 +281,8 @@ export default {
               topic: this.editedItem?.topic,
               description: this.editedItem?.description,
               video_link: this.editedItem?.video_link,
-              note_link: this.editedItem?.note_link ?? "",
-              summary_link: this.editedItem?.summary_link ?? "",
+              note_link: this.editedItem?.note_link,
+              summary_link: this.editedItem?.summary_link,
               create_date: new Date(),
             })
             .then(() => {
@@ -293,6 +290,7 @@ export default {
                 "Data added successfully.",
                 "success",
               ]);
+              this.clear();
               this.btnLoading = false;
             });
         }
@@ -340,8 +338,8 @@ export default {
               topic: this.editedItem?.topic,
               video_link: this.editedItem?.video_link,
               description: this.editedItem?.description,
-              note_link: this.editedItem?.note_link ?? "",
-              summary_link: this.editedItem?.summary_link ?? "",
+              note_link: this.editedItem?.note_link,
+              summary_link: this.editedItem?.summary_link,
               last_update_date: new Date(),
             })
             .then(() => {
@@ -349,6 +347,7 @@ export default {
                 "Data updated successfully.",
                 "success",
               ]);
+              this.clear();
               this.btnLoading = false;
             });
         }
@@ -393,18 +392,22 @@ export default {
           // Upload File
           var id = uuid();
           const value = await storageRefNote
-            .child(`Note_File_${id}`)
+            .child(`Note_File_${id}_${this.noteFile.name}`)
             .put(this.noteFile);
-          this.editedItem.note_link = value.ref.getDownloadURL();
+          await value.ref.getDownloadURL().then((url) => {
+            this.editedItem.note_link = url;
+          });
         }
         if (fileType === "summary") {
           await this.deleteFiles(this.editedItem.summary_link);
           // Upload File
           var id = uuid();
           const value = await storageRefSummary
-            .child(`Summary_File_${id}`)
+            .child(`Summary_File_${id}_${this.summaryFile.name}`)
             .put(this.summaryFile);
-          this.editedItem.summary_link = value.ref.getDownloadURL();
+          await value.ref.getDownloadURL().then((url) => {
+            this.editedItem.summary_link = url;
+          });
         }
       } catch (error) {
         console.log(error);
@@ -430,6 +433,13 @@ export default {
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
       });
+    },
+    clear() {
+      this.$nextTick(() => {
+        this.editedItem = Object.assign({}, this.defaultItem);
+      });
+      this.noteFile = null;
+      this.summaryFile = null;
     },
   },
 };

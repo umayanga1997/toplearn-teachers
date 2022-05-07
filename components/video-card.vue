@@ -17,7 +17,15 @@
       <v-card-title> {{ item.topic }} </v-card-title>
 
       <v-card-subtitle> {{ item.description }} </v-card-subtitle>
+      <v-container class="download-class">
+        <a :href="item.note_link" download>
+          <v-icon>mdi-download</v-icon> <span>Note</span>
+        </a>
 
+        <a class="ml-5" :href="item.summary_link" download
+          ><v-icon>mdi-download</v-icon><span>Summary</span>
+        </a>
+      </v-container>
       <v-card-actions>
         <v-btn @click="deleteF()" icon color="red lighten-3">
           <v-icon>mdi-delete</v-icon>
@@ -60,6 +68,16 @@ export default {
     height: 80px;
     width: 80px;
     background: transparent;
+  }
+}
+.download-class {
+  & a {
+    color: lightgreen;
+    text-decoration: none;
+    & i {
+      color: lightgreen !important;
+      padding-right: 2px;
+    }
   }
 }
 </style>
