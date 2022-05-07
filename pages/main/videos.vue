@@ -204,7 +204,7 @@ export default {
     initialize() {
       try {
         this.loading = true;
-        videosRef.onSnapshot((querySnapshot) => {
+        videosRef.where("teacher_id", "==", "").onSnapshot((querySnapshot) => {
           this.items = [];
           querySnapshot.docs.forEach((doc) => {
             this.items.push(doc.data());
@@ -214,7 +214,6 @@ export default {
         topicsRef
           .where("grade", "==", "")
           .where("subject", "==", "")
-          .where("teacher_id", "==", "")
           .onSnapshot((querySnapshot) => {
             this.topicList = [];
             querySnapshot.docs.forEach((doc) => {

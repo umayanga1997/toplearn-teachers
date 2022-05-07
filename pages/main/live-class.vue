@@ -206,17 +206,19 @@ export default {
     initialize() {
       try {
         this.loading = true;
-        liveClassRef.onSnapshot((querySnapshot) => {
-          this.items = [];
-          querySnapshot.docs.forEach((doc) => {
-            this.items.push(doc.data());
+        liveClassRef
+          .where("teacher_id", "==", "")
+          .onSnapshot((querySnapshot) => {
+            this.items = [];
+            querySnapshot.docs.forEach((doc) => {
+              this.items.push(doc.data());
+            });
+            this.loading = false;
           });
-          this.loading = false;
-        });
         topicsRef
           .where("grade", "==", "")
           .where("subject", "==", "")
-          .where("teacher_id", "==", "")
+
           .onSnapshot((querySnapshot) => {
             this.topicList = [];
             querySnapshot.docs.forEach((doc) => {
