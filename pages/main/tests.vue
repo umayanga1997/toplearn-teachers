@@ -115,12 +115,10 @@
 
 <script>
 import { v4 as uuid } from "uuid";
-import testCard from "~/components/test-card.vue";
 var testsRef;
 var topicsRef;
 
 export default {
-  components: { testCard },
   name: "videos_screen",
   data: () => ({
     dialog: false,
