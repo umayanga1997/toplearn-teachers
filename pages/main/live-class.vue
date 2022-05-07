@@ -216,6 +216,7 @@ export default {
         topicsRef
           .where("grade", "==", "")
           .where("subject", "==", "")
+          .where("teacher_id", "==", "")
           .onSnapshot((querySnapshot) => {
             this.topicList = [];
             querySnapshot.docs.forEach((doc) => {
