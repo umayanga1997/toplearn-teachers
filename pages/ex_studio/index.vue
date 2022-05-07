@@ -1,5 +1,8 @@
 <template>
-  <div></div>
+  <div>
+    <!-- {{ this.$route.query.id }} -->
+    <exam-card />
+  </div>
 </template>
 
 <script>

@@ -18,7 +18,7 @@
         <v-spacer></v-spacer>
 
         <v-btn icon @click="navigate" color="orange">
-          <v-icon>mdi-note-multiple-outline</v-icon>
+          <v-icon>mdi-checkbook</v-icon>
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -35,7 +35,7 @@ export default {
   // },
   methods: {
     navigate() {
-      this.$router.push({path:"ex_studio"});
+      this.$router.push({ path: "ex_studio", query: { id: this.item.id } });
     },
 
     edit() {
