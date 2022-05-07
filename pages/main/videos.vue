@@ -292,7 +292,6 @@ export default {
               subject: "",
               teacher_id: "",
               medium: "",
-              medium: "",
               topic: this.editedItem?.topic,
               description: this.editedItem?.description,
               price: Number(this.editedItem?.price),
