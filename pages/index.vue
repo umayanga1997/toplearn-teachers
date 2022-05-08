@@ -85,8 +85,9 @@
         :key="item"
       >
         <v-container fluid>
-          <videospage v-if="index == 0" />
-          <tests v-else-if="index == 1" />
+          <dashboard v-if="index == 0" />
+          <videospage v-else-if="index == 1" />
+          <tests v-else-if="index == 2" />
           <onlineclass v-else />
         </v-container>
       </v-tab-item>
@@ -128,7 +129,8 @@
 <script>
 import videospage from "@/pages/main/videos.vue";
 import tests from "@/pages/main/tests.vue";
-import onlineclass from "~/pages/main/live-class.vue";
+import onlineclass from "@/pages/main/live-class.vue";
+import dashboard from "@/pages/main/dashboard.vue";
 
 var topicsRef;
 
@@ -138,14 +140,15 @@ export default {
     videospage,
     tests,
     onlineclass,
+    dashboard,
   },
   data() {
     return {
       tab: null,
-      items: ["Videos", "Tests", "Live Classes"],
+      items: ["Dashboard", "Videos", "Tests", "Live Classes"],
       topicList: [],
       drawerItems: [
-        { title: "Dashboard", icon: "mdi-view-dashboard", to: "/dashboard" },
+        // { title: "Dashboard", icon: "mdi-view-dashboard", to: "/dashboard" },
         { title: "Profile", icon: "mdi-account-circle", to: "/user/profile" },
       ],
       topicListData: [],
