@@ -18,7 +18,7 @@
         <v-spacer></v-spacer>
 
         <v-btn icon @click="navigate" color="orange">
-          <v-icon>mdi-checkbook</v-icon>
+          <v-icon>mdi-note-edit</v-icon>
         </v-btn>
       </v-card-actions>
     </v-card>
