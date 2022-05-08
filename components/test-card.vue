@@ -7,6 +7,8 @@
 
       <p class="pl-4 pr-4">Rs. {{ item.price }}/=</p>
 
+      <p class="pl-4 pr-4 mt-4 pink">Count of Sales : {{ salesCount }}</p>
+
       <v-card-actions>
         <v-btn @click="deleteF()" icon color="red lighten-3">
           <v-icon>mdi-delete</v-icon>
@@ -28,11 +30,11 @@
 export default {
   name: "test-card-compo",
   props: ["item"],
-  // data() {
-  //   return {
-  //     show: false,
-  //   };
-  // },
+  data() {
+    return {
+      salesCount: 0,
+    };
+  },
   methods: {
     navigate() {
       this.$router.push({

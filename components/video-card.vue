@@ -20,6 +20,8 @@
 
       <p class="pl-3 pr-3">Rs. {{ item.price }}/=</p>
 
+      <p class="pl-4 pr-4 mt-4 pink">Count of Sales : {{ salesCount }}</p>
+
       <v-container class="download-class">
         <a :href="item.note_link" download>
           <v-icon>mdi-download</v-icon> <span>Note</span>
@@ -46,7 +48,7 @@ export default {
   props: ["item"],
   data() {
     return {
-      show: false,
+      salesCount: 0,
     };
   },
   methods: {
