@@ -143,6 +143,8 @@ export default {
                           name: snapshots.data()["name"],
                           isAuth: true,
                           grade: snapshots.data()["grade"],
+                          email: snapshots.data()["email"],
+                          // password: snapshots.data()["password"],
                           subject: snapshots.data()["subject"],
                           medium: snapshots.data()["medium"],
                         })
@@ -164,6 +166,7 @@ export default {
                           ]);
                         })
                         .catch((error) => {
+                          this.btnLoading = false;
                           this.$store.commit("AlertMessage/message", [
                             error,
                             "error",
@@ -182,6 +185,7 @@ export default {
                     ]);
                   });
               } else {
+                this.btnLoading = false;
                 this.$store.dispatch("alertState/message", [
                   "The System user not registered. Please try again.",
                   "error",
@@ -193,7 +197,10 @@ export default {
               this.$store.dispatch("alertState/message", [error, "error"]);
             });
         }
-      } catch (error) {}
+      } catch (error) {
+        this.btnLoading = false;
+        this.$store.commit("AlertMessage/message", [error, "error"]);
+      }
     },
   },
 };

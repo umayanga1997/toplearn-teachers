@@ -25,10 +25,11 @@
     </v-app-bar>
     <!-- Drawer -->
     <v-navigation-drawer v-model="drawer" fixed bottom temporary>
-      <v-list-item>
-        <!-- <v-list-item-avatar>
-          <v-img src="https://randomuser.me/api/portraits/men/78.jpg"></v-img>
-        </v-list-item-avatar> -->
+      <v-list-item :to="'/user/profile'" router>
+        <v-list-item-avatar>
+          <!-- <v-img src="https://randomuser.me/api/portraits/men/78.jpg"></v-img> -->
+          <v-icon large>mdi-account-circle</v-icon>
+        </v-list-item-avatar>
 
         <v-list-item-content>
           <v-list-item-title>{{ userName }}</v-list-item-title>
@@ -36,7 +37,7 @@
       </v-list-item>
 
       <v-divider></v-divider>
-      <v-list dense>
+      <!-- <v-list dense>
         <v-list-item
           v-for="(item, i) in drawerItems"
           :key="i"
@@ -44,15 +45,13 @@
           router
           exact
         >
-          <v-list-item-icon>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-icon>
+          <v-list-item-icon> </v-list-item-icon>
 
           <v-list-item-content>
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-      </v-list>
+      </v-list> -->
       <!-- <v-list nav dense>
           <v-list-item-group
             v-model="group"
@@ -147,10 +146,10 @@ export default {
       tab: null,
       items: ["Dashboard", "Videos", "Tests", "Live Classes"],
       topicList: [],
-      drawerItems: [
-        // { title: "Dashboard", icon: "mdi-view-dashboard", to: "/dashboard" },
-        { title: "Profile", icon: "mdi-account-circle", to: "/user/profile" },
-      ],
+      // drawerItems: [
+      //   // { title: "Dashboard", icon: "mdi-view-dashboard", to: "/dashboard" },
+      //   // { title: "Profile", icon: "mdi-account-circle", to: "/user/profile" },
+      // ],
       topicListData: [],
       drawer: false,
       loading: false,
@@ -196,7 +195,7 @@ export default {
           .signOut()
           .then(async () => {
             localStorage.removeItem("systemuser");
-            await this.$store.commit("alertMessage/message", [
+            this.$store.dispatch("alertState/message", [
               "Sign out successfully.",
               "success",
             ]);
@@ -205,10 +204,10 @@ export default {
             // window.history.go("/"); // Only Web
           })
           .catch((error) => {
-            this.$store.commit("AlertMessage/message", [error, "error"]);
+            this.$store.dispatch("alertState/message", [error, "error"]);
           });
       } catch (error) {
-        this.$store.commit("alertMessage/message", [error, "error"]);
+        this.$store.dispatch("alertState/message", [error, "error"]);
       }
     },
     initialize() {
@@ -246,5 +245,11 @@ export default {
     padding: 0px !important;
     margin: 0px !important;
   }
+}
+.v-navigation-drawer {
+  max-height: 57px !important;
+  position: absolute;
+  background-color: green !important;
+  top: 40% !important;
 }
 </style>
