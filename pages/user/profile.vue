@@ -1,7 +1,7 @@
 <template>
   <v-col class="main-compo" cols="12" md="4" sm="6" xl="4" lg="3">
     <v-card elevation="2" class="pa-4">
-      <h3>Update Profile</h3>
+      <p class="ma-0 f-size">Update Profile</p>
       <v-card-text class="center-card">
         <v-form ref="form" lazy-validation>
           <v-col class="pl-0 pr-0 pt-5">
@@ -181,5 +181,8 @@ export default {
   & .center-card {
     text-align: center;
   }
+}
+.f-size {
+  font-size: 20px;
 }
 </style>
