@@ -10,6 +10,9 @@
       <v-btn icon @click="filterDialog = !filterDialog">
         <v-icon color="orange">mdi-filter</v-icon>
       </v-btn>
+      <v-btn icon @click="signOut()"
+        ><v-icon class="appBar-icon">mdi-logout</v-icon></v-btn
+      >
 
       <template v-slot:extension>
         <v-tabs v-model="tab" centered color="orange">
@@ -22,6 +25,34 @@
     </v-app-bar>
     <!-- Drawer -->
     <v-navigation-drawer v-model="drawer" fixed bottom temporary>
+      <v-list-item>
+        <!-- <v-list-item-avatar>
+          <v-img src="https://randomuser.me/api/portraits/men/78.jpg"></v-img>
+        </v-list-item-avatar> -->
+
+        <v-list-item-content>
+          <v-list-item-title>{{ userName }}</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+
+      <v-divider></v-divider>
+      <v-list dense>
+        <v-list-item
+          v-for="(item, i) in drawerItems"
+          :key="i"
+          :to="item.to"
+          router
+          exact
+        >
+          <v-list-item-icon>
+            <v-icon>{{ item.icon }}</v-icon>
+          </v-list-item-icon>
+
+          <v-list-item-content>
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
       <!-- <v-list nav dense>
           <v-list-item-group
             v-model="group"
@@ -111,8 +142,12 @@ export default {
   data() {
     return {
       tab: null,
-      items: ["Videos", "Tests", "Live Class"],
+      items: ["Videos", "Tests", "Live Classes"],
       topicList: [],
+      drawerItems: [
+        { title: "Dashboard", icon: "mdi-view-dashboard", to: "/dashboard" },
+        { title: "Profile", icon: "mdi-account-circle", to: "/user/profile" },
+      ],
       topicListData: [],
       drawer: false,
       loading: false,
@@ -120,17 +155,65 @@ export default {
       filterDialog: false,
     };
   },
+  mounted() {
+    this.$store.commit("systemUser/findUserData");
+  },
   created() {
     topicsRef = this.$fire.firestore.collection("topics");
-    this.initialize();
+    this.checkAuth();
+  },
+  computed: {
+    userName() {
+      return this.$store.getters["systemUser/userData"]?.name;
+    },
+    userData() {
+      return this.$store.getters["systemUser/userData"];
+    },
   },
   methods: {
+    async checkAuth() {
+      try {
+        await this.$fire.auth.onAuthStateChanged(async (user) => {
+          if (user) {
+            if (this.userData?.isAuth ?? false) {
+              this.$router.replace(this.$router.currentRoute).catch(() => {});
+              this.initialize();
+            }
+          } else {
+            this.$router.replace("/user/auth").catch(() => {});
+          }
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async signOut() {
+      try {
+        await this.$fire.auth
+          .signOut()
+          .then(async () => {
+            localStorage.removeItem("systemuser");
+            await this.$store.commit("alertMessage/message", [
+              "Sign out successfully.",
+              "success",
+            ]);
+            this.$router.replace("/user/auth").catch(() => {});
+            // this.$router.go().catch(() => {});
+            // window.history.go("/"); // Only Web
+          })
+          .catch((error) => {
+            this.$store.commit("AlertMessage/message", [error, "error"]);
+          });
+      } catch (error) {
+        this.$store.commit("alertMessage/message", [error, "error"]);
+      }
+    },
     initialize() {
       try {
         this.loading = true;
         topicsRef
-          .where("grade", "==", "")
-          .where("subject", "==", "")
+          .where("grade", "==", this.userData?.grade)
+          .where("subject", "==", this.userData?.subject)
           .onSnapshot((querySnapshot) => {
             this.topicList = [];
             this.topicListData = [];

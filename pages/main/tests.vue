@@ -136,6 +136,9 @@ export default {
     formTitle() {
       return this.editedIndex === -1 ? "New" : "Edit";
     },
+    userData() {
+      return this.$store.getters["systemUser/userData"];
+    },
   },
 
   watch: {
@@ -155,16 +158,18 @@ export default {
     initialize() {
       try {
         this.loading = true;
-        testsRef.where("teacher_id", "==", "").onSnapshot((querySnapshot) => {
-          this.items = [];
-          querySnapshot.docs.forEach((doc) => {
-            this.items.push(doc.data());
+        testsRef
+          .where("teacher_id", "==", this.userData?.teacher_id)
+          .onSnapshot((querySnapshot) => {
+            this.items = [];
+            querySnapshot.docs.forEach((doc) => {
+              this.items.push(doc.data());
+            });
+            this.loading = false;
           });
-          this.loading = false;
-        });
         topicsRef
-          .where("grade", "==", "")
-          .where("subject", "==", "")
+          .where("grade", "==", this.userData?.grade)
+          .where("subject", "==", this.userData?.subject)
           .onSnapshot((querySnapshot) => {
             this.topicList = [];
             querySnapshot.docs.forEach((doc) => {
@@ -214,10 +219,11 @@ export default {
             .doc(id)
             .set({
               id: id,
-              grade: "",
-              subject: "",
-              teacher_id: "",
-              medium: "",
+              grade: this.userData.grade,
+              subject: this.userData.subject,
+              teacher_id: this.userData.teacher_id,
+              teacher_name: this.userData.name,
+              medium: this.userData.medium,
               topic: this.editedItem?.topic,
               price: Number(this.editedItem?.price),
               description: this.editedItem?.description,
@@ -262,6 +268,11 @@ export default {
           testsRef
             .doc(this.editedItem.id)
             .update({
+              // grade: userData.grade,
+              // subject: userData.subject,
+              // teacher_id: userData.teacher_id,
+              teacher_name: this.userData.name,
+              // medium: userData.medium,
               topic: this.editedItem?.topic,
               price: Number(this.editedItem?.price),
               description: this.editedItem?.description,

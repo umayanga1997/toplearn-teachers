@@ -188,6 +188,9 @@ export default {
     formTitle() {
       return this.editedIndex === -1 ? "New" : "Edit";
     },
+    userData() {
+      return this.$store.getters["systemUser/userData"];
+    },
   },
 
   watch: {
@@ -207,7 +210,7 @@ export default {
       try {
         this.loading = true;
         liveClassRef
-          .where("teacher_id", "==", "")
+          .where("teacher_id", "==", this.userData?.teacher_id)
           .onSnapshot((querySnapshot) => {
             this.items = [];
             querySnapshot.docs.forEach((doc) => {
@@ -216,9 +219,8 @@ export default {
             this.loading = false;
           });
         topicsRef
-          .where("grade", "==", "")
-          .where("subject", "==", "")
-
+          .where("grade", "==", this.userData?.grade)
+          .where("subject", "==", this.userData?.subject)
           .onSnapshot((querySnapshot) => {
             this.topicList = [];
             querySnapshot.docs.forEach((doc) => {
@@ -279,17 +281,18 @@ export default {
         } else {
           this.btnLoading = true;
           var id = uuid();
+
           liveClassRef
             .doc(id)
             .set({
               id: id,
-              grade: "",
-              subject: "",
-              teacher_id: "",
-              teacher_name: "",
+              grade: this.userData.grade,
+              subject: this.userData.subject,
+              teacher_id: this.userData.teacher_id,
+              teacher_name: this.userData.name,
               topic: this.editedItem.topic,
               price: Number(this.editedItem?.price),
-              medium: "",
+              medium: this.userData.medium,
               link: this.editedItem.link,
               schedule_date: this.editedItem.schedule_date,
               schedule_time: this.editedItem.schedule_time,
@@ -326,16 +329,17 @@ export default {
           ]);
         } else {
           this.btnLoading = true;
+
           liveClassRef
             .doc(this.editedItem.id)
             .update({
-              grade: "",
-              subject: "",
-              teacher_id: "",
-              teacher_name: "",
+              // grade: userData.grade,
+              // subject: userData.subject,
+              // teacher_id: userData.teacher_id,
+              teacher_name: this.userData.name,
               topic: this.editedItem.topic,
               price: Number(this.editedItem?.price),
-              medium: "",
+              // medium: userData.medium,
               link: this.editedItem.link,
               schedule_date: this.editedItem.schedule_date,
               schedule_time: this.editedItem.schedule_time,

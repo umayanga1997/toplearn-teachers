@@ -3,7 +3,7 @@
     <v-card elevation="2" class="pa-4">
       <v-tabs v-model="tab" color="orange">
         <v-tab> Sign In </v-tab>
-        <v-tab> Sign Up </v-tab>
+        <!-- <v-tab> Sign Up </v-tab> -->
       </v-tabs>
 
       <v-card-text class="center-card">
@@ -11,7 +11,7 @@
           ><v-icon size="35">mdi-account</v-icon></v-avatar
         >
         <v-form ref="form" lazy-validation>
-          <v-col class="pa-0 ma-0 pt-5">
+          <v-col class="pl-0 pr-0 pt-5">
             <v-text-field
               v-model="email"
               :rules="[rules.required, rules.email]"
@@ -22,7 +22,7 @@
               required
             ></v-text-field>
           </v-col>
-          <v-col class="pa-0 ma-0">
+          <v-col class="pl-0 pr-0 mt-2">
             <v-text-field
               v-model="password"
               :rules="[rules.required, rules.mincounter, rules.maxcounter]"
@@ -38,23 +38,9 @@
               required
             ></v-text-field>
           </v-col>
-          <v-col class="pa-0 ma-0">
-            <v-select
-              dense
-              v-model="selectedRole"
-              :rules="[rules.required]"
-              :items="roles"
-              hide-selected
-              solo
-              label="Role"
-              outlined
-              clearable
-              required
-            ></v-select>
-          </v-col>
         </v-form>
       </v-card-text>
-      <v-card-actions class="pb-5">
+      <v-card-actions class="pb-5 mt-3 pr-0">
         <v-spacer></v-spacer>
         <v-btn
           @click="tab == 0 ? signIn() : signUp()"
@@ -62,12 +48,7 @@
           :disabled="btnLoading"
           class="green darken-3 ma-0 pa-4 mr-5 white--text"
           dark
-          >{{ tab == 0 ? "Sign In" : "Sign Up"
-          }}<template v-slot:loader>
-            <span class="custom-loader">
-              <v-icon>mdi-cached</v-icon>
-            </span>
-          </template></v-btn
+          >{{ tab == 0 ? "Sign In" : "Sign Up" }}</v-btn
         >
       </v-card-actions>
     </v-card>
@@ -75,6 +56,8 @@
 </template>
 
 <script>
+var teachersRef;
+
 export default {
   name: "signin_screen",
   head: {
@@ -95,7 +78,7 @@ export default {
     return {
       tab: null,
       selectedRole: null,
-      roles: ["Student", "Teacher"],
+      // roles: ["Student", "Teacher"],
       email: "",
       password: "",
       isPassShow: false,
@@ -112,17 +95,104 @@ export default {
       },
     };
   },
+  mounted() {
+    this.$store.commit("systemUser/findUserData");
+  },
+  created() {
+    teachersRef = this.$fire.firestore.collection("teachers");
+    this.checkAuth();
+  },
   methods: {
+    async checkAuth() {
+      try {
+        await this.$fire.auth.onAuthStateChanged(async (user) => {
+          if (user) {
+            if (this.$store.getters["systemUser/userData"]?.isAuth ?? false) {
+              this.$router.replace("/").catch(() => {});
+            }
+          } else {
+            this.$router.replace("/user/auth").catch(() => {});
+          }
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    },
     signIn() {
       try {
-        this.$refs.form.validate();
-        console.log("Sign In");
-      } catch (error) {}
-    },
-    signUp() {
-      try {
-        this.$refs.form.validate();
-        console.log("Sign Up");
+        if (this.$refs.form.validate()) {
+          this.btnLoading = true;
+          // this.email = this.email;
+          this.$fire.auth
+            .signInWithEmailAndPassword(this.email, this.password)
+            .then((userCredential) => {
+              // Signed in
+              return userCredential.user?.uid ?? null;
+            })
+            .then((uid) => {
+              if (uid != null) {
+                teachersRef
+                  .doc(uid)
+                  .get()
+                  .then(async (snapshots) => {
+                    if (snapshots.data()["active"] == true) {
+                      await localStorage.setItem(
+                        "systemuser",
+                        JSON.stringify({
+                          teacher_id: snapshots.data()["teacher_id"],
+                          name: snapshots.data()["name"],
+                          isAuth: true,
+                          grade: snapshots.data()["grade"],
+                          subject: snapshots.data()["subject"],
+                          medium: snapshots.data()["medium"],
+                        })
+                      );
+
+                      this.$store.dispatch("alertState/message", [
+                        "Sign in successfully.",
+                        "success",
+                      ]);
+                      this.$router.replace("/").catch(() => {});
+                    } else {
+                      await this.$fire.auth
+                        .signOut()
+                        .then(() => {
+                          localStorage.removeItem("systemuser");
+                          this.$store.commit("alertMessage/message", [
+                            "The system user data not exist. Please try again.",
+                            "error",
+                          ]);
+                        })
+                        .catch((error) => {
+                          this.$store.commit("AlertMessage/message", [
+                            error,
+                            "error",
+                          ]);
+                        });
+                    }
+                  })
+                  .then(() => {
+                    this.btnLoading = false;
+                  })
+                  .catch((error) => {
+                    this.btnLoading = false;
+                    this.$store.dispatch("alertState/message", [
+                      error,
+                      "error",
+                    ]);
+                  });
+              } else {
+                this.$store.dispatch("alertState/message", [
+                  "The System user not registered. Please try again.",
+                  "error",
+                ]);
+              }
+            })
+            .catch((error) => {
+              this.btnLoading = false;
+              this.$store.dispatch("alertState/message", [error, "error"]);
+            });
+        }
       } catch (error) {}
     },
   },
