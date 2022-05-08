@@ -285,17 +285,33 @@ export default {
         this.btnLoading = true;
         testsRef
           .doc(this.editedItem.id)
-          .delete()
+          .collection("questions")
+          .get()
+          .then((querySnapshot) => {
+            querySnapshot.docs?.forEach((snapshot) => {
+              snapshot.ref.delete();
+            });
+          })
           .then(() => {
-            this.$store.dispatch("alertState/message", [
-              "Data deleted successfully.",
-              "success",
-            ]);
+            testsRef
+              .doc(this.editedItem.id)
+              .delete()
+              .then(() => {
+                this.$store.dispatch("alertState/message", [
+                  "Data deleted successfully.",
+                  "success",
+                ]);
+                this.btnLoading = false;
+                this.close();
+              });
+          })
+          .catch((e) => {
+            console.log(e);
             this.btnLoading = false;
-            this.close();
           });
       } catch (error) {
         console.log(error);
+        this.btnLoading = false;
       }
     },
     close() {
