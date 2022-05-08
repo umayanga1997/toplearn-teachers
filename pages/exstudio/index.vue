@@ -1,7 +1,18 @@
 <template>
   <div>
-    <v-row justify="center" class="ma-0 pa-0 card-section" dense>
-      <test-card
+    <!-- Tool Bar -->
+    <v-app-bar dark dense fixed app>
+      <!-- <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon> -->
+      <v-toolbar-title class="orange--text"
+        >Exam Studio -
+        <span class="white--text">{{
+          this.$route.query.topic
+        }}</span></v-toolbar-title
+      >
+    </v-app-bar>
+
+    <v-row justify="center" class="ma-0 pa-0" dense>
+      <exam-card
         v-for="item in items"
         :key="item.id"
         :item="item"
@@ -20,25 +31,46 @@
             <v-row>
               <v-col cols="12" md="6" lg="6" sm="12">
                 <v-select
-                  :items="topicList"
-                  v-model="editedItem.topic"
-                  label="Topic"
+                  :items="['Single Answer', 'Multiple Answer', 'Upload Answer']"
+                  v-model="editedItem.question_type"
+                  label="Question Type"
                   dense
                   outlined
                 ></v-select>
               </v-col>
-              <v-col cols="12" md="6" lg="6" sm="12">
-                <v-text-field
-                  v-model="editedItem.price"
-                  label="Price"
-                  dense
-                  outlined
-                ></v-text-field>
-              </v-col>
               <v-col cols="12">
                 <v-textarea
-                  v-model="editedItem.description"
-                  label="Description"
+                  v-model="editedItem.question"
+                  label="Question"
+                  dense
+                  outlined
+                  class="text-area-max-height"
+                  height="110"
+                  no-resize
+                ></v-textarea>
+              </v-col>
+
+              <v-col
+                v-if="editedItem.question_type != 'Upload Answer'"
+                cols="12"
+              >
+                <v-textarea
+                  v-model="editedItem.answers"
+                  label="Answers"
+                  dense
+                  outlined
+                  class="text-area-max-height"
+                  height="110"
+                  no-resize
+                ></v-textarea>
+              </v-col>
+              <v-col
+                v-if="editedItem.question_type != 'Upload Answer'"
+                cols="12"
+              >
+                <v-textarea
+                  v-model="editedItem.currect_answers"
+                  label="Currect Answer(s)"
                   dense
                   outlined
                   class="text-area-max-height"
@@ -115,18 +147,18 @@
 
 <script>
 import { v4 as uuid } from "uuid";
+
 var testsRef;
-var topicsRef;
+var testID;
 
 export default {
-  name: "videos_screen",
+  name: "ex_studio_screen",
   data: () => ({
     dialog: false,
     dialogType: "a",
     loading: false,
     btnLoading: false,
     search: "",
-    topicList: [],
     items: [],
     editedItem: [],
     editedIndex: -1,
@@ -145,9 +177,8 @@ export default {
   },
 
   created() {
+    testID = this.$route.query.id;
     testsRef = this.$fire.firestore.collection("tests");
-    topicsRef = this.$fire.firestore.collection("topics");
-
     this.initialize();
   },
 
@@ -155,21 +186,15 @@ export default {
     initialize() {
       try {
         this.loading = true;
-        testsRef.where("teacher_id", "==", "").onSnapshot((querySnapshot) => {
-          this.items = [];
-          querySnapshot.docs.forEach((doc) => {
-            this.items.push(doc.data());
-          });
-          this.loading = false;
-        });
-        topicsRef
-          .where("grade", "==", "")
-          .where("subject", "==", "")
+        testsRef
+          .doc(testID)
+          .collection("questions")
           .onSnapshot((querySnapshot) => {
-            this.topicList = [];
+            this.items = [];
             querySnapshot.docs.forEach((doc) => {
-              this.topicList.push(doc.data()["topic"]);
+              this.items.push(doc.data());
             });
+            this.loading = false;
           });
       } catch (error) {
         console.log(error);
@@ -184,26 +209,38 @@ export default {
     },
     async saveData() {
       try {
-        if (this.editedItem.topic == null || this.editedItem.topic == "") {
+        if (
+          this.editedItem.question_type == null ||
+          this.editedItem.question_type == ""
+        ) {
           this.$store.dispatch("alertState/message", [
-            "Please select Topic of Subject",
+            "Please select Type of Question",
             "error",
           ]);
         } else if (
-          this.editedItem.price == null ||
-          this.editedItem.price == "" ||
-          Number(this.editedItem.price ?? 0) <= 0
+          this.editedItem.question == null ||
+          this.editedItem.question == ""
         ) {
           this.$store.dispatch("alertState/message", [
-            "Please enter Price",
+            "Please enter Question",
             "error",
           ]);
         } else if (
-          this.editedItem.description == null ||
-          this.editedItem.description == ""
+          (this.editedItem.question_type != "Upload Answer" &&
+            this.editedItem.answers == null) ||
+          this.editedItem.answers == ""
         ) {
           this.$store.dispatch("alertState/message", [
-            "Please enter Description",
+            "Please enter Answer(s)",
+            "error",
+          ]);
+        } else if (
+          (this.editedItem.question_type != "Upload Answer" &&
+            this.editedItem.currect_answers == null) ||
+          this.editedItem.currect_answers == ""
+        ) {
+          this.$store.dispatch("alertState/message", [
+            "Please enter Currect Answer(s)",
             "error",
           ]);
         } else {
@@ -211,16 +248,16 @@ export default {
           var id = uuid();
 
           testsRef
+            .doc(testID)
+            .collection("questions")
             .doc(id)
             .set({
               id: id,
-              grade: "",
-              subject: "",
-              teacher_id: "",
-              medium: "",
-              topic: this.editedItem?.topic,
-              price: Number(this.editedItem?.price),
-              description: this.editedItem?.description,
+              test_id: testID,
+              question_type: this.editedItem?.question_type,
+              question: this.editedItem?.question,
+              answers: this.editedItem.answers ?? null,
+              currect_answers: this.editedItem.currect_answers ?? null,
               create_date: new Date(),
             })
             .then(() => {
@@ -240,31 +277,44 @@ export default {
     async updateData() {
       try {
         if (
-          this.editedItem.description == null ||
-          this.editedItem.description == ""
+          this.editedItem.question == null ||
+          this.editedItem.question == ""
         ) {
           this.$store.dispatch("alertState/message", [
-            "Please enter Description",
+            "Please enter Question",
             "error",
           ]);
         } else if (
-          this.editedItem.price == null ||
-          this.editedItem.price == "" ||
-          Number(this.editedItem.price ?? 0) <= 0
+          (this.editedItem.question_type != "Upload Answer" &&
+            this.editedItem.answers == null) ||
+          this.editedItem.answers == ""
         ) {
           this.$store.dispatch("alertState/message", [
-            "Please enter Price",
+            "Please enter Answer(s)",
+            "error",
+          ]);
+        } else if (
+          (this.editedItem.question_type != "Upload Answer" &&
+            this.editedItem.currect_answers == null) ||
+          this.editedItem.currect_answers == ""
+        ) {
+          this.$store.dispatch("alertState/message", [
+            "Please enter Currect Answer(s)",
             "error",
           ]);
         } else {
           this.btnLoading = true;
 
           testsRef
+            .doc(testID)
+            .collection("questions")
             .doc(this.editedItem.id)
             .update({
-              topic: this.editedItem?.topic,
-              price: Number(this.editedItem?.price),
-              description: this.editedItem?.description,
+              // test_id: testID,
+              question_type: this.editedItem?.question_type,
+              question: this.editedItem?.question,
+              answers: this.editedItem.answers ?? null,
+              currect_answers: this.editedItem.currect_answers ?? null,
               last_update_date: new Date(),
             })
             .then(() => {
@@ -284,6 +334,8 @@ export default {
       try {
         this.btnLoading = true;
         testsRef
+          .doc(testID)
+          .collection("questions")
           .doc(this.editedItem.id)
           .delete()
           .then(() => {
@@ -314,3 +366,9 @@ export default {
   },
 };
 </script>
+
+<style lang="scss">
+// .topic-color {
+//   color: rgb(154, 255, 221) !important;
+// }
+</style>

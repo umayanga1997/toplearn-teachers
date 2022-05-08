@@ -35,7 +35,10 @@ export default {
   // },
   methods: {
     navigate() {
-      this.$router.push({ path: "ex_studio", query: { id: this.item.id } });
+      this.$router.push({
+        path: "exstudio",
+        query: { id: this.item.id, topic: this.item.topic },
+      });
     },
 
     edit() {
