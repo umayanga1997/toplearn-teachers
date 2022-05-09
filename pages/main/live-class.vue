@@ -224,6 +224,9 @@ export default {
               this.items.push(doc.data());
               this.originalItems.push(doc.data());
             });
+            // Filter Management
+            if (this.filterValue != null || this.filterValue == "")
+              this.items = this.filtering(this.filterValue, this.originalItems);
             this.loading = false;
           });
         topicsRef
