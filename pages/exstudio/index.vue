@@ -11,7 +11,7 @@
       >
     </v-app-bar>
 
-    <loading v-if="loading" />
+    <loading-compo v-if="loading" />
     <v-row v-else justify="center" class="ma-0 pa-0" dense>
       <exam-card
         v-for="item in items"

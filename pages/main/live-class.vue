@@ -1,6 +1,6 @@
 <template>
   <div>
-    <loading v-if="loading" />
+    <loading-compo v-if="loading" />
     <v-row v-else justify="center" class="ma-0 pa-0 card-section" dense>
       <live-card
         v-for="item in items"
