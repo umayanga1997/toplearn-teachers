@@ -202,7 +202,7 @@ export default {
         topicsRef
           .where("grade", "==", this.userData?.grade)
           .where("subject", "==", this.userData?.subject)
-          .onSnapshot((querySnapshot) => {
+          .onSnapshot({ includeMetadataChanges: true }, (querySnapshot) => {
             this.topicList = [];
             this.topicListData = [];
             querySnapshot.docs.forEach((doc) => {

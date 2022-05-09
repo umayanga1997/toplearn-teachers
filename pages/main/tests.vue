@@ -161,7 +161,7 @@ export default {
         this.loading = true;
         testsRef
           .where("teacher_id", "==", this.userData?.teacher_id)
-          .onSnapshot((querySnapshot) => {
+          .onSnapshot({ includeMetadataChanges: true }, (querySnapshot) => {
             this.items = [];
             querySnapshot.docs.forEach((doc) => {
               this.items.push(doc.data());
@@ -171,7 +171,7 @@ export default {
         topicsRef
           .where("grade", "==", this.userData?.grade)
           .where("subject", "==", this.userData?.subject)
-          .onSnapshot((querySnapshot) => {
+          .onSnapshot({ includeMetadataChanges: true }, (querySnapshot) => {
             this.topicList = [];
             querySnapshot.docs.forEach((doc) => {
               this.topicList.push(doc.data()["topic"]);

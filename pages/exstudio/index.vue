@@ -190,7 +190,7 @@ export default {
         testsRef
           .doc(testID)
           .collection("questions")
-          .onSnapshot((querySnapshot) => {
+          .onSnapshot({ includeMetadataChanges: true }, (querySnapshot) => {
             this.items = [];
             querySnapshot.docs.forEach((doc) => {
               this.items.push(doc.data());
