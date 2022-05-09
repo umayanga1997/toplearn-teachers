@@ -152,13 +152,16 @@ export default {
                         "systemuser"
                       );
                       // Token set to cookie
-                      Cookies.set("access_token", token);
+                      var in30Minutes = 1 / 48;
+                      Cookies.set("access_token", token, {
+                        expires: in30Minutes,
+                      });
 
                       this.$store.dispatch("alertState/message", [
                         "Sign in successfully.",
                         "success",
                       ]);
-                      // Page replace
+                      // Reload
                       this.$router.go();
                     } else {
                       await this.$fire.auth

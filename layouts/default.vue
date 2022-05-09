@@ -42,6 +42,8 @@ export default {
         if (this.$store.getters["systemUser/userData"] != null) {
           if (this.$route.path == "/user/auth")
             this.$router.replace("/").catch(() => {});
+        } else {
+          this.$router.replace("/user/auth").catch(() => {});
         }
       } else {
         this.$router.replace("/user/auth").catch(() => {});

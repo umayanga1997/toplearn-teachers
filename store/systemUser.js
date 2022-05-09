@@ -12,6 +12,8 @@ export const mutations = {
       jwt.verify(token, "systemuser", function (error, decoded) {
         if (error == null) state.userData = decoded;
       });
+    } else {
+      state.userData = null;
     }
     // state.userData = JSON.parse(localStorage.getItem("systemuser"));
   },

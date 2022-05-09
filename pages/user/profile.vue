@@ -120,7 +120,10 @@ export default {
                     "systemuser"
                   );
                   // Token set to cookie (Reset)
-                  Cookies.set("access_token", token);
+                  var in30Minutes = 1 / 48;
+                  Cookies.set("access_token", token, {
+                    expires: in30Minutes,
+                  });
                 })
                 .then(() => {
                   this.$store.dispatch("alertState/message", [
