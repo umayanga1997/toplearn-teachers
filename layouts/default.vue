@@ -3,7 +3,7 @@
     <v-main>
       <!-- Body -->
       <v-container fluid>
-        <Nuxt keep-alive/>
+        <Nuxt keep-alive />
       </v-container>
     </v-main>
     <v-footer absolute app>
@@ -50,9 +50,7 @@ export default {
       }
     });
   },
-  data() {
-    return {};
-  },
+
   computed: {
     isAlertShow() {
       return this.$store.getters["alertState/isAlertShow"];
