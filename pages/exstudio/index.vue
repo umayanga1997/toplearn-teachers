@@ -11,7 +11,8 @@
       >
     </v-app-bar>
 
-    <v-row justify="center" class="ma-0 pa-0" dense>
+    <loading v-if="loading" />
+    <v-row v-else justify="center" class="ma-0 pa-0" dense>
       <exam-card
         v-for="item in items"
         :key="item.id"

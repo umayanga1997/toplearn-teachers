@@ -3,7 +3,7 @@
     <v-main>
       <!-- Body -->
       <v-container fluid>
-        <Nuxt />
+        <Nuxt keep-alive/>
       </v-container>
     </v-main>
     <v-footer absolute app>

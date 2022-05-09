@@ -152,9 +152,9 @@ export default {
                         "systemuser"
                       );
                       // Token set to cookie
-                      var in30Minutes = 1 / 48;
+                      // var in30Minutes = 1 / 48;
                       Cookies.set("access_token", token, {
-                        expires: in30Minutes,
+                        expires: 1,
                       });
 
                       this.$store.dispatch("alertState/message", [
