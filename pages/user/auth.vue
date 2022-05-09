@@ -56,6 +56,9 @@
 </template>
 
 <script>
+import jwt from "jsonwebtoken";
+import Cookies from "js-cookie";
+
 var teachersRef;
 
 export default {
@@ -73,7 +76,7 @@ export default {
     // ],
     // link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]
   },
-  layout: "auth",
+  // layout: "auth",
   data() {
     return {
       tab: null,
@@ -100,33 +103,17 @@ export default {
   },
   created() {
     teachersRef = this.$fire.firestore.collection("teachers");
-    this.checkAuth();
   },
   methods: {
-    async checkAuth() {
-      try {
-        await this.$fire.auth.onAuthStateChanged(async (user) => {
-          if (user) {
-            if (this.$store.getters["systemUser/userData"]?.isAuth ?? false) {
-              this.$router.replace("/").catch(() => {});
-            }
-          } else {
-            this.$router.replace("/user/auth").catch(() => {});
-          }
-        });
-      } catch (error) {
-        console.log(error);
-      }
-    },
     signIn() {
       try {
         if (this.$refs.form.validate()) {
           this.btnLoading = true;
-          // this.email = this.email;
           this.$fire.auth
             .signInWithEmailAndPassword(this.email, this.password)
             .then((userCredential) => {
-              // Signed in
+              // Signed in without cookies
+              // onAuthStateChanged triggerin, but not route to home screen (Require cookies (System User Data))
               return userCredential.user?.uid ?? null;
             })
             .then((uid) => {
@@ -136,8 +123,22 @@ export default {
                   .get()
                   .then(async (snapshots) => {
                     if (snapshots.data()["active"] == true) {
-                      await localStorage.setItem(
-                        "systemuser",
+                      // await localStorage.setItem(
+                      //   "systemuser",
+                      //   JSON.stringify({
+                      //     teacher_id: snapshots.data()["teacher_id"],
+                      //     name: snapshots.data()["name"],
+                      //     isAuth: true,
+                      //     grade: snapshots.data()["grade"],
+                      //     email: snapshots.data()["email"],
+                      //     // password: snapshots.data()["password"],
+                      //     subject: snapshots.data()["subject"],
+                      //     medium: snapshots.data()["medium"],
+                      //   })
+                      // );
+
+                      // Create jwt token
+                      let token = jwt.sign(
                         JSON.stringify({
                           teacher_id: snapshots.data()["teacher_id"],
                           name: snapshots.data()["name"],
@@ -147,19 +148,23 @@ export default {
                           // password: snapshots.data()["password"],
                           subject: snapshots.data()["subject"],
                           medium: snapshots.data()["medium"],
-                        })
+                        }),
+                        "systemuser"
                       );
+                      // Token set to cookie
+                      Cookies.set("access_token", token);
 
                       this.$store.dispatch("alertState/message", [
                         "Sign in successfully.",
                         "success",
                       ]);
-                      this.$router.replace("/").catch(() => {});
+                      // Page replace
+                      this.$router.go();
                     } else {
                       await this.$fire.auth
                         .signOut()
                         .then(() => {
-                          localStorage.removeItem("systemuser");
+                          Cookies.remove("access_token");
                           this.$store.commit("alertMessage/message", [
                             "The system user data not exist. Please try again.",
                             "error",
@@ -192,14 +197,14 @@ export default {
                 ]);
               }
             })
-            .catch((error) => {
+            .catch(async (error) => {
               this.btnLoading = false;
               this.$store.dispatch("alertState/message", [error, "error"]);
             });
         }
       } catch (error) {
         this.btnLoading = false;
-        this.$store.commit("AlertMessage/message", [error, "error"]);
+        this.$store.dispatch("alertState/message", [error, "error"]);
       }
     },
   },

@@ -47,6 +47,9 @@
 </template>
 
 <script>
+import jwt from "jsonwebtoken";
+import Cookies from "js-cookie";
+
 var teachersRef;
 
 export default {
@@ -101,9 +104,10 @@ export default {
                   name: this.name,
                 })
                 .then(async () => {
-                  // localStorage.removeItem("systemuser");
-                  await localStorage.setItem(
-                    "systemuser",
+                  // Remove previos cookie
+                  Cookies.remove("access_token");
+                  // Create jwt token (Create a new with a new name)
+                  let token = jwt.sign(
                     JSON.stringify({
                       teacher_id: this.userData.teacher_id,
                       name: this.name,
@@ -112,8 +116,11 @@ export default {
                       grade: this.userData.grade,
                       subject: this.userData.subject,
                       medium: this.userData.medium,
-                    })
+                    }),
+                    "systemuser"
                   );
+                  // Token set to cookie (Reset)
+                  Cookies.set("access_token", token);
                 })
                 .then(() => {
                   this.$store.dispatch("alertState/message", [

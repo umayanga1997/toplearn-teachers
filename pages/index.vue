@@ -130,6 +130,7 @@ import videospage from "@/pages/main/videos.vue";
 import tests from "@/pages/main/tests.vue";
 import onlineclass from "@/pages/main/live-class.vue";
 import dashboard from "@/pages/main/dashboard.vue";
+import Cookies from "js-cookie";
 
 var topicsRef;
 
@@ -157,12 +158,8 @@ export default {
       filterDialog: false,
     };
   },
-  mounted() {
-    this.$store.commit("systemUser/findUserData");
-  },
   created() {
     topicsRef = this.$fire.firestore.collection("topics");
-    this.checkAuth();
   },
   computed: {
     userName() {
@@ -173,33 +170,18 @@ export default {
     },
   },
   methods: {
-    async checkAuth() {
-      try {
-        await this.$fire.auth.onAuthStateChanged(async (user) => {
-          if (user) {
-            if (this.userData?.isAuth ?? false) {
-              this.$router.replace(this.$router.currentRoute).catch(() => {});
-              this.initialize();
-            }
-          } else {
-            this.$router.replace("/user/auth").catch(() => {});
-          }
-        });
-      } catch (error) {
-        console.log(error);
-      }
-    },
     async signOut() {
       try {
         await this.$fire.auth
           .signOut()
           .then(async () => {
-            localStorage.removeItem("systemuser");
+            // localStorage.removeItem("systemuser");
+            Cookies.remove("access_token");
             this.$store.dispatch("alertState/message", [
               "Sign out successfully.",
               "success",
             ]);
-            this.$router.replace("/user/auth").catch(() => {});
+            // this.$router.replace("/user/auth").catch(() => {});
             // this.$router.go().catch(() => {});
             // window.history.go("/"); // Only Web
           })

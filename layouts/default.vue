@@ -34,57 +34,22 @@
 <script>
 export default {
   name: "DefaultLayout",
+  beforeCreate() {
+    this.$fire.auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        this.$store.commit("systemUser/findUserData");
+        // This is working with already signin and cookies setted session
+        if (this.$store.getters["systemUser/userData"] != null) {
+          if (this.$route.path == "/user/auth")
+            this.$router.replace("/").catch(() => {});
+        }
+      } else {
+        this.$router.replace("/user/auth").catch(() => {});
+      }
+    });
+  },
   data() {
-    return {
-      drawer: false,
-      items: [
-        {
-          icon: "mdi-apps",
-          title: "Home",
-          to: "/",
-        },
-        {
-          icon: "mdi-numeric",
-          title: "Grades",
-          to: "/grades",
-        },
-        {
-          icon: "mdi-file-table",
-          title: "Subjects",
-          to: "/subjects",
-        },
-        {
-          icon: "mdi-apache-kafka",
-          title: "Topics",
-          to: "/topics",
-        },
-        {
-          icon: "mdi-video-box",
-          title: "Videos",
-          to: "/videos",
-        },
-        {
-          icon: "mdi-note-multiple",
-          title: "Tests",
-          to: "/tests",
-        },
-        {
-          icon: "mdi-video-vintage",
-          title: "Live Class",
-          to: "/live_class",
-        },
-        {
-          icon: "mdi-account-multiple",
-          title: "Teachers",
-          to: "/users/teachers",
-        },
-        {
-          icon: "mdi-account-group",
-          title: "Students",
-          to: "/users/students",
-        },
-      ],
-    };
+    return {};
   },
   computed: {
     isAlertShow() {
@@ -97,6 +62,7 @@ export default {
       return this.$store.getters["alertState/msg"];
     },
   },
+  methods: {},
 };
 </script>
 
