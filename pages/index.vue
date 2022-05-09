@@ -160,6 +160,7 @@ export default {
   },
   created() {
     topicsRef = this.$fire.firestore.collection("topics");
+    this.initialize();
   },
   computed: {
     userName() {
