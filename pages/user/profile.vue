@@ -67,10 +67,9 @@ export default {
       btnLoadingUpdate: false,
     };
   },
-  mounted() {
-    this.$store.commit("systemUser/findUserData");
-  },
+
   created() {
+    this.$store.commit("systemUser/findUserData");
     teachersRef = this.$fire.firestore.collection("teachers");
   },
   computed: {

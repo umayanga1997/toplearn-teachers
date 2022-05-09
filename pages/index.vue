@@ -158,7 +158,10 @@ export default {
       filterDialog: false,
     };
   },
-  created() {
+  beforeCreate() {
+    this.$store.commit("systemUser/findUserData");
+  },
+  mounted() {
     topicsRef = this.$fire.firestore.collection("topics");
     this.initialize();
   },
