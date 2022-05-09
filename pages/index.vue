@@ -105,6 +105,7 @@
               <v-select
                 :items="topicList"
                 label="Topics"
+                v-model="filterData"
                 dense
                 outlined
               ></v-select>
@@ -116,9 +117,7 @@
           <v-btn color="red lighten-1" text @click="filterDialog = false">
             Close
           </v-btn>
-          <v-btn color="green darken-2" @click="filterDialog = false">
-            Filter
-          </v-btn>
+          <v-btn color="green darken-2" @click="filterCommit()"> Filter </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -145,13 +144,14 @@ export default {
   data() {
     return {
       tab: null,
+      filterData: null,
       items: ["Dashboard", "Videos", "Tests", "Live Classes"],
       topicList: [],
       // drawerItems: [
       //   // { title: "Dashboard", icon: "mdi-view-dashboard", to: "/dashboard" },
       //   // { title: "Profile", icon: "mdi-account-circle", to: "/user/profile" },
       // ],
-      topicListData: [],
+      // topicListData: [],
       drawer: false,
       loading: false,
       show: false,
@@ -204,10 +204,11 @@ export default {
           .where("subject", "==", this.userData?.subject)
           .onSnapshot({ includeMetadataChanges: true }, (querySnapshot) => {
             this.topicList = [];
-            this.topicListData = [];
+            this.topicList.push("All");
+            // this.topicListData = [];
             querySnapshot.docs.forEach((doc) => {
               this.topicList.push(doc.data()["topic"]);
-              this.topicListData.push(doc.data());
+              // this.topicListData.push(doc.data());
             });
             this.loading = false;
           });
@@ -215,6 +216,9 @@ export default {
         console.log(error);
         this.loading = false;
       }
+    },
+    filterCommit() {
+      this.$store.commit("filter/filter", this.filterData);
     },
   },
 };

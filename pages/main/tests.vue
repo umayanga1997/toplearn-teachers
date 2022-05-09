@@ -129,6 +129,7 @@ export default {
     search: "",
     topicList: [],
     items: [],
+    originalItems: [],
     editedItem: [],
     editedIndex: -1,
   }),
@@ -145,6 +146,10 @@ export default {
   watch: {
     dialog(val) {
       val || this.close();
+    },
+    // From mixin
+    filterValue(value) {
+      this.items = this.filtering(value, this.originalItems);
     },
   },
 
@@ -163,8 +168,10 @@ export default {
           .where("teacher_id", "==", this.userData?.teacher_id)
           .onSnapshot({ includeMetadataChanges: true }, (querySnapshot) => {
             this.items = [];
+            this.originalItems = [];
             querySnapshot.docs.forEach((doc) => {
               this.items.push(doc.data());
+              this.originalItems.push(doc.data());
             });
             this.loading = false;
           });
