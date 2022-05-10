@@ -4,7 +4,7 @@
     <v-app-bar dark dense fixed app>
       <!-- <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon> -->
       <v-toolbar-title class="orange--text"
-        >Exam Studio -
+        >Test Studio -
         <span class="white--text">{{
           this.$route.query.topic
         }}</span></v-toolbar-title
@@ -13,7 +13,7 @@
 
     <loading-compo v-if="loading" />
     <v-row v-else justify="center" class="ma-0 pa-0" dense>
-      <exam-card
+      <test-q-card
         v-for="item in items"
         :key="item.id"
         :item="item"

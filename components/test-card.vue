@@ -38,7 +38,7 @@ export default {
   methods: {
     navigate() {
       this.$router.push({
-        path: "exstudio",
+        path: "test_studio",
         query: { id: this.item.id, topic: this.item.topic },
       });
     },
