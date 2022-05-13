@@ -230,7 +230,9 @@ export default {
             .doc(id)
             .set({
               id: id,
+              grade_id: this.userData.grade_id,
               grade: this.userData.grade,
+              subject_id: this.userData.subject_id,
               subject: this.userData.subject,
               teacher_id: this.userData.teacher_id,
               teacher_name: this.userData.name,

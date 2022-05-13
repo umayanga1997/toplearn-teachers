@@ -103,6 +103,26 @@ export default {
                   name: this.name,
                 })
                 .then(async () => {
+                  await this.videosUpdate(
+                    "teacher_id",
+                    this.userData.teacher_id,
+                    "teacher_name",
+                    this.userData.teacher_name
+                  );
+                  await this.testsUpdate(
+                    "teacher_id",
+                    this.userData.teacher_id,
+                    "teacher_name",
+                    this.userData.teacher_name
+                  );
+                  await this.liveClassesUpdate(
+                    "teacher_id",
+                    this.userData.teacher_id,
+                    "teacher_name",
+                    this.userData.teacher_name
+                  );
+                })
+                .then(async () => {
                   // Remove previos cookie
                   Cookies.remove("access_token");
                   // Create jwt token (Create a new with a new name)
