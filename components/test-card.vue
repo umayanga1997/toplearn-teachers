@@ -7,7 +7,7 @@
 
       <p class="pl-4 pr-4">Rs. {{ item.price }}/=</p>
 
-      <p class="pl-4 pr-4 mt-4 pink">Count of Sales : {{ salesCount }}</p>
+      <!-- <p class="pl-4 pr-4 mt-4 pink">Count of Sales : {{ salesCount }}</p> -->
 
       <v-card-actions>
         <v-btn @click="deleteF()" icon color="red lighten-3">
