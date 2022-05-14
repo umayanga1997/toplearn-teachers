@@ -2,7 +2,9 @@
   <div>
     <loading-compo v-if="loading" />
     <v-row v-else justify="center" class="ma-0 pa-0 card-section" dense>
+      <data-not-found v-if="items.length == 0"></data-not-found>
       <video-card
+        v-else
         v-for="item in items"
         :key="item.id"
         :item="item"
