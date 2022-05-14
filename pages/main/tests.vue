@@ -36,6 +36,15 @@
                   outlined
                 ></v-text-field>
               </v-col>
+              <v-col cols="12" md="6" lg="6" sm="12">
+                <v-text-field
+                  v-model="editedItem.duration_hr"
+                  label="Duration"
+                  prefix="Hour"
+                  dense
+                  outlined
+                ></v-text-field>
+              </v-col>
               <v-col cols="12">
                 <v-textarea
                   v-model="editedItem.description"
@@ -215,6 +224,14 @@ export default {
             "error",
           ]);
         } else if (
+          this.editedItem.duration_hr == null ||
+          this.editedItem.duration_hr == ""
+        ) {
+          this.$store.dispatch("alertState/message", [
+            "Please enter Duration(hr)",
+            "error",
+          ]);
+        } else if (
           this.editedItem.description == null ||
           this.editedItem.description == ""
         ) {
@@ -240,6 +257,7 @@ export default {
               topic: this.editedItem?.topic,
               price: Number(this.editedItem?.price),
               description: this.editedItem?.description,
+              duration_hr: this.editedItem.duration_hr,
               create_date: new Date(),
             })
             .then(() => {
@@ -259,20 +277,28 @@ export default {
     async updateData() {
       try {
         if (
-          this.editedItem.description == null ||
-          this.editedItem.description == ""
-        ) {
-          this.$store.dispatch("alertState/message", [
-            "Please enter Description",
-            "error",
-          ]);
-        } else if (
           this.editedItem.price == null ||
           this.editedItem.price == "" ||
           Number(this.editedItem.price ?? 0) <= 0
         ) {
           this.$store.dispatch("alertState/message", [
             "Please enter Price",
+            "error",
+          ]);
+        } else if (
+          this.editedItem.duration_hr == null ||
+          this.editedItem.duration_hr == ""
+        ) {
+          this.$store.dispatch("alertState/message", [
+            "Please enter Duration(hr)",
+            "error",
+          ]);
+        } else if (
+          this.editedItem.description == null ||
+          this.editedItem.description == ""
+        ) {
+          this.$store.dispatch("alertState/message", [
+            "Please enter Description",
             "error",
           ]);
         } else {
@@ -289,6 +315,7 @@ export default {
               topic: this.editedItem?.topic,
               price: Number(this.editedItem?.price),
               description: this.editedItem?.description,
+              duration_hr: this.editedItem.duration_hr,
               last_update_date: new Date(),
             })
             .then(() => {
