@@ -31,8 +31,9 @@
           <v-container>
             <v-row>
               <v-col cols="12" md="6" lg="6" sm="12">
+                <!-- ['Single Answer', 'Multiple Answer', 'Upload Answer'] -->
                 <v-select
-                  :items="['Single Answer', 'Multiple Answer', 'Upload Answer']"
+                  :items="['Single Answer', 'Multiple Answer']"
                   v-model="editedItem.question_type"
                   label="Question Type"
                   dense
