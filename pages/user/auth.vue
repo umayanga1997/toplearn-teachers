@@ -170,14 +170,14 @@ export default {
                         .signOut()
                         .then(() => {
                           Cookies.remove("access_token");
-                          this.$store.commit("alertMessage/message", [
+                          this.$store.commit("alertState/message", [
                             "The system user data not exist. Please try again.",
                             "error",
                           ]);
                         })
                         .catch((error) => {
                           this.btnLoading = false;
-                          this.$store.commit("AlertMessage/message", [
+                          this.$store.commit("alertState/message", [
                             error,
                             "error",
                           ]);
