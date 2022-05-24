@@ -10,7 +10,7 @@
       >
         <dashoard-card
           headline="Videos"
-          :title="'S.Count : ' + count_of_videos_sale.toFixed(2)"
+          :title="'S.Count : ' + count_of_videos_sale"
           :subtitle="'S.Amount : ' + amount_of_videos_sale.toFixed(2)"
           :head_color="'yellow--text'"
           :title_color="'white--text'"
@@ -19,7 +19,7 @@
         ></dashoard-card>
         <dashoard-card
           headline="Tests"
-          :title="'S.Count : ' + count_of_tests_sale.toFixed(2)"
+          :title="'S.Count : ' + count_of_tests_sale"
           :subtitle="'S.Amount : ' + amount_of_tests_sale.toFixed(2)"
           :head_color="'yellow--text'"
           :title_color="'white--text'"
@@ -28,7 +28,7 @@
         ></dashoard-card>
         <dashoard-card
           headline="Live Classes"
-          :title="'S.Count : ' + count_of_live_class_enrolment.toFixed(2)"
+          :title="'S.Count : ' + count_of_live_class_enrolment"
           :subtitle="'S.Amount : ' + amount_of_live_class_enrolment.toFixed(2)"
           :head_color="'yellow--text'"
           :title_color="'white--text'"
