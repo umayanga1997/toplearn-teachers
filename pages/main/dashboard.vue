@@ -135,6 +135,12 @@ export default {
                 { includeMetadataChanges: true },
                 async (snapshot) => {
                   this.items = [];
+                  this.count_of_videos_sale = 0;
+                  this.amount_of_videos_sale = 0;
+                  this.count_of_tests_sale = 0;
+                  this.amount_of_tests_sale = 0;
+                  this.count_of_live_class_enrolment = 0;
+                  this.amount_of_live_class_enrolment = 0;
                   await snapshot.ref
                     .collection("sold_videos")
                     .get()

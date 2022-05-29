@@ -3,7 +3,7 @@
     <loading-compo v-if="loading" />
     <v-row v-else justify="center" class="ma-0 pa-0 card-section" dense>
       <data-not-found v-if="items.length == 0"></data-not-found>
-      <test-card
+      <tute-card
         v-else
         v-for="item in items"
         :key="item.id"
@@ -32,25 +32,8 @@
               </v-col>
               <v-col cols="12" md="6" lg="6" sm="12">
                 <v-text-field
-                  v-model="editedItem.test_link"
-                  label="Test Link"
-                  dense
-                  outlined
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6" lg="6" sm="12">
-                <v-text-field
                   v-model="editedItem.price"
                   label="Price"
-                  dense
-                  outlined
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6" lg="6" sm="12">
-                <v-text-field
-                  v-model="editedItem.duration_hr"
-                  label="Duration"
-                  prefix="Hour"
                   dense
                   outlined
                 ></v-text-field>
@@ -60,11 +43,30 @@
                   v-model="editedItem.description"
                   label="Description"
                   dense
+                  height="110"
                   outlined
                   class="text-area-max-height"
-                  height="110"
                   no-resize
                 ></v-textarea>
+              </v-col>
+
+              <v-col cols="12" md="6" lg="6" sm="12">
+                <v-file-input
+                  v-model="tuteFile"
+                  label="Tute"
+                  outlined
+                  dense
+                  class="file-input"
+                  height="38"
+                ></v-file-input>
+                <p
+                  class="mt-2 green--text"
+                  v-if="
+                    editedItem.tute_link != null && editedItem.tute_link != ''
+                  "
+                >
+                  Already Uploaded
+                </p>
               </v-col>
             </v-row>
           </v-container>
@@ -135,16 +137,18 @@
 
 <script>
 import { v4 as uuid } from "uuid";
-var testsRef;
+var videosRef;
 var topicsRef;
+var storageRefTute;
 
 export default {
-  name: "videos_screen",
+  name: "tutes_screen",
   data: () => ({
     dialog: false,
     dialogType: "a",
     loading: false,
     btnLoading: false,
+    tuteFile: null,
     search: "",
     topicList: [],
     items: [],
@@ -173,9 +177,9 @@ export default {
   },
 
   created() {
-    testsRef = this.$fire.firestore.collection("tests");
+    videosRef = this.$fire.firestore.collection("videos");
     topicsRef = this.$fire.firestore.collection("topics");
-
+    storageRefTute = this.$fire.storage.ref("tutes/");
     this.initialize();
   },
 
@@ -183,7 +187,7 @@ export default {
     initialize() {
       try {
         this.loading = true;
-        testsRef
+        videosRef
           .where("teacher_id", "==", this.userData?.teacher_id)
           .onSnapshot({ includeMetadataChanges: true }, (querySnapshot) => {
             this.items = [];
@@ -225,28 +229,12 @@ export default {
             "error",
           ]);
         } else if (
-          this.editedItem.test_link == null ||
-          this.editedItem.test_link == ""
-        ) {
-          this.$store.dispatch("alertState/message", [
-            "Please enter Test Link",
-            "error",
-          ]);
-        } else if (
           this.editedItem.price == null ||
           this.editedItem.price == "" ||
           Number(this.editedItem.price ?? 0) <= 0
         ) {
           this.$store.dispatch("alertState/message", [
             "Please enter Price",
-            "error",
-          ]);
-        } else if (
-          this.editedItem.duration_hr == null ||
-          this.editedItem.duration_hr == ""
-        ) {
-          this.$store.dispatch("alertState/message", [
-            "Please enter Duration(hr)",
             "error",
           ]);
         } else if (
@@ -257,11 +245,19 @@ export default {
             "Please enter Description",
             "error",
           ]);
+        } else if (this.tuteFile == null) {
+          this.$store.dispatch("alertState/message", [
+            "Please enter Note File",
+            "error",
+          ]);
         } else {
           this.btnLoading = true;
           var id = uuid();
 
-          testsRef
+          // Upload Files
+          if (this.tuteFile != null) await this.uploadFiles("tutes");
+
+          videosRef
             .doc(id)
             .set({
               id: id,
@@ -271,12 +267,11 @@ export default {
               subject: this.userData.subject,
               teacher_id: this.userData.teacher_id,
               teacher_name: this.userData.name,
-              medium: this.userData.medium,
+              medium: this.userData?.medium,
               topic: this.editedItem?.topic,
-              test_link: this.editedItem?.test_link,
-              price: Number(this.editedItem?.price),
               description: this.editedItem?.description,
-              duration_hr: this.editedItem.duration_hr,
+              price: Number(this.editedItem?.price),
+              tute_link: this.editedItem?.tute_link,
               create_date: new Date(),
             })
             .then(() => {
@@ -296,28 +291,12 @@ export default {
     async updateData() {
       try {
         if (
-          this.editedItem.test_link == null ||
-          this.editedItem.test_link == ""
-        ) {
-          this.$store.dispatch("alertState/message", [
-            "Please enter Test Link",
-            "error",
-          ]);
-        } else if (
           this.editedItem.price == null ||
           this.editedItem.price == "" ||
           Number(this.editedItem.price ?? 0) <= 0
         ) {
           this.$store.dispatch("alertState/message", [
             "Please enter Price",
-            "error",
-          ]);
-        } else if (
-          this.editedItem.duration_hr == null ||
-          this.editedItem.duration_hr == ""
-        ) {
-          this.$store.dispatch("alertState/message", [
-            "Please enter Duration(hr)",
             "error",
           ]);
         } else if (
@@ -331,7 +310,10 @@ export default {
         } else {
           this.btnLoading = true;
 
-          testsRef
+          // Upload Files
+          if (this.tuteFile != null) await this.uploadFiles("tutes");
+
+          videosRef
             .doc(this.editedItem.id)
             .update({
               // grade: userData.grade,
@@ -340,10 +322,9 @@ export default {
               teacher_name: this.userData.name,
               // medium: userData.medium,
               topic: this.editedItem?.topic,
-              test_link: this.editedItem?.test_link,
-              price: Number(this.editedItem?.price),
               description: this.editedItem?.description,
-              duration_hr: this.editedItem.duration_hr,
+              price: Number(this.editedItem?.price),
+              tute_link: this.editedItem?.tute_link,
               last_update_date: new Date(),
             })
             .then(() => {
@@ -362,35 +343,58 @@ export default {
     deleteData() {
       try {
         this.btnLoading = true;
-        testsRef
+        videosRef
           .doc(this.editedItem.id)
-          .collection("questions")
-          .get()
-          .then((querySnapshot) => {
-            querySnapshot.docs?.forEach((snapshot) => {
-              snapshot.ref.delete();
-            });
+          .delete()
+          .then(async () => {
+            if (
+              // this.editedItem?.tute_link == null ||
+              this.editedItem?.tute_link != ""
+            )
+              await this.deleteFiles(this.editedItem.tute_link);
           })
           .then(() => {
-            testsRef
-              .doc(this.editedItem.id)
-              .delete()
-              .then(() => {
-                this.$store.dispatch("alertState/message", [
-                  "Data deleted successfully.",
-                  "success",
-                ]);
-                this.btnLoading = false;
-                this.close();
-              });
-          })
-          .catch((e) => {
-            console.log(e);
+            this.$store.dispatch("alertState/message", [
+              "Data deleted successfully.",
+              "success",
+            ]);
             this.btnLoading = false;
+            this.close();
           });
       } catch (error) {
         console.log(error);
-        this.btnLoading = false;
+      }
+    },
+    async uploadFiles(fileType) {
+      try {
+        if (fileType === "tutes") {
+          await this.deleteFiles(this.editedItem.tute_link);
+          // Upload File
+          var id = uuid();
+          const value = await storageRefTute
+            .child(`Tute_File_${id}_${this.tuteFile.name}`)
+            .put(this.tuteFile);
+          await value.ref.getDownloadURL().then((url) => {
+            this.editedItem.tute_link = url;
+          });
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async deleteFiles(url) {
+      try {
+        if (url != null && url != "") {
+          // Delete File
+          await this.$fire.storage
+            .refFromURL(url)
+            .delete()
+            .catch((e) => {
+              this.$store.dispatch("alertState/message", [e, "error"]);
+            });
+        }
+      } catch (error) {
+        console.log(error);
       }
     },
     close() {
@@ -403,9 +407,14 @@ export default {
       this.$nextTick(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
       });
-      this.noteFile = null;
-      this.summaryFile = null;
+      this.tuteFile = null;
     },
   },
 };
 </script>
+
+<style lang="scss">
+.file-input {
+  max-height: 38px;
+}
+</style>
