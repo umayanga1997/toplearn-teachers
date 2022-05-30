@@ -6,19 +6,24 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    titleTemplate: "%s - toplearn-teachers",
-    title: "toplearn-teachers",
+    titleTemplate: "%s - TLT",
+    title: "Top Learn-Teachers",
     htmlAttrs: {
       lang: "en",
     },
     meta: [
       { charset: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { hid: "description", name: "description", content: "" },
+      {
+        hid: "description",
+        name: "description",
+        content:
+          "At Top Learn Education, we strongly believe that Education is the most powerful weapon you can use to change the world. We will support relentlessly to solve student problems related to their curriculum at a reasonable cost.",
+      },
       { name: "format-detection", content: "telephone=no" },
     ],
     link: [
-      { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+      { rel: "icon", type: "image/x-icon", href: "/icon.png" },
       { href: "https://vjs.zencdn.net/7.18.1/video-js.css", rel: "stylesheet" },
     ],
     script: [{ src: "https://vjs.zencdn.net/7.18.1/video.min.js" }],

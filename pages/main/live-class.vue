@@ -202,8 +202,8 @@ export default {
     filterValue(value) {
       this.items = this.filtering(value, this.originalItems);
     },
-    wgData() {
-      this.initTpics();
+    wgData(value) {
+      if (value != null) this.initTpics();
     },
   },
 
@@ -241,7 +241,7 @@ export default {
       try {
         this.loading = true;
         topicsRef
-          .where("grade_id", "==", this.wgData.wg_id)
+          .where("grade_id", "==", this.wgData?.wg_id)
           .where("subject", "==", this.userData?.subject)
           .onSnapshot({ includeMetadataChanges: true }, (querySnapshot) => {
             this.topicList = [];

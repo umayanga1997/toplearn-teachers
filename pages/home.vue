@@ -4,7 +4,9 @@
     <v-app-bar dark dense fixed app>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
-      <v-toolbar-title>TOP-LEARN</v-toolbar-title>
+      <v-toolbar-title>
+        <img width="110" class="pt-5" src="~/assets/logo/logo-large.png" />
+      </v-toolbar-title>
 
       <v-spacer />
       <v-tooltip bottom>
@@ -234,7 +236,7 @@ export default {
   beforeCreate() {
     this.$store.commit("systemUser/findUserData");
   },
-  mounted() {
+  created() {
     gradesRef = this.$fire.firestore.collection("grades");
     topicsRef = this.$fire.firestore.collection("topics");
     this.initialize();
@@ -245,8 +247,8 @@ export default {
     },
   },
   watch: {
-    wgData() {
-      this.initTpics();
+    wgData(value) {
+      if (value != null) this.initTpics();
     },
   },
   methods: {
@@ -299,6 +301,10 @@ export default {
 
     initTpics() {
       try {
+        this.$store.dispatch("alertState/message", [
+          "Topics are loading...",
+          "success",
+        ]);
         this.loading = true;
         topicsRef
           .where("grade_id", "==", this.wgData.wg_id)
