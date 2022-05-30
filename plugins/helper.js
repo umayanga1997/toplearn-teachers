@@ -6,6 +6,12 @@ Vue.mixin({
     filterValue() {
       return this.$store.getters["filter/filterValue"];
     },
+    userData() {
+      return this.$store.getters["systemUser/userData"];
+    },
+    wgData() {
+      return this.$store.getters["wg/getWgData"];
+    },
   },
   methods: {
     dateTimeFormater(value) {
@@ -15,10 +21,13 @@ Vue.mixin({
     },
     filtering(value, originalList) {
       try {
-        let list = [];
-        if (value == "All") list = originalList;
-        else
-          list = originalList.filter((element) => element.topic == value) ?? [];
+        var list = originalList;
+        // Grade
+        if (value[0] != "All" && value[0] != null)
+          list = list.filter((element) => element.grade == value[0]);
+        // Topic
+        if (value[1] != "All" && value[1] != null)
+          list = list.filter((element) => element.topic == value[1]);
         return list;
       } catch (error) {
         console.log(error);

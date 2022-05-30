@@ -7,12 +7,43 @@
       <v-toolbar-title>TOP-LEARN</v-toolbar-title>
 
       <v-spacer />
-      <v-btn icon @click="filterDialog = !filterDialog">
-        <v-icon color="orange">mdi-filter</v-icon>
-      </v-btn>
-      <v-btn icon @click="signOut()"
-        ><v-icon class="appBar-icon">mdi-logout</v-icon></v-btn
-      >
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+            text
+            class="orange--text"
+            v-bind="attrs"
+            v-on="on"
+            @click="wgDialog = !wgDialog"
+          >
+            {{
+              workingGrade == null || workingGrade == "" ? "WG" : workingGrade
+            }}
+          </v-btn>
+        </template>
+        <span>Working Grade</span>
+      </v-tooltip>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn
+            v-bind="attrs"
+            v-on="on"
+            icon
+            @click="filterDialog = !filterDialog"
+          >
+            <v-icon color="orange">mdi-filter</v-icon>
+          </v-btn>
+        </template>
+        <span>Filter</span>
+      </v-tooltip>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn v-bind="attrs" v-on="on" icon @click="signOut()"
+            ><v-icon class="appBar-icon">mdi-logout</v-icon></v-btn
+          ></template
+        >
+        <span>Sign Out</span>
+      </v-tooltip>
 
       <template v-slot:extension>
         <v-tabs v-model="tab" centered color="orange">
@@ -92,7 +123,8 @@
         </v-container>
       </v-tab-item>
     </v-tabs-items>
-    <v-dialog v-model="filterDialog" persistent max-width="500px">
+    <!-- Filter Dialog -->
+    <v-dialog v-model="filterDialog" persistent max-width="600px">
       <v-card>
         <v-card-title>
           <span class="text-h5">Filter</span>
@@ -102,11 +134,20 @@
             <!-- <v-col>
               <v-select :items="items" label="Grade" dense outlined></v-select>
             </v-col> -->
-            <v-col>
+            <v-col cols="12" md="6" lg="6" sm="12">
+              <v-select
+                :items="gradesList"
+                label="Grade"
+                v-model="filterGrade"
+                dense
+                outlined
+              ></v-select>
+            </v-col>
+            <v-col cols="12" md="6" lg="6" sm="12">
               <v-select
                 :items="topicList"
                 label="Topics"
-                v-model="filterData"
+                v-model="filterTopic"
                 dense
                 outlined
               ></v-select>
@@ -122,6 +163,34 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <!-- Working Grade Dialog -->
+    <v-dialog v-model="wgDialog" persistent max-width="350px">
+      <v-card>
+        <v-card-title>
+          <span class="text-h5">Working Grade</span>
+        </v-card-title>
+        <v-card-text>
+          <v-row class="mt-1">
+            <v-col>
+              <v-select
+                :items="gradesListWithoutAll"
+                label="Grade"
+                v-model="workingGrade"
+                dense
+                outlined
+              ></v-select>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red lighten-1" text @click="wgDialog = false">
+            Close
+          </v-btn>
+          <v-btn color="green darken-2" @click="saveWG()"> Save </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -134,6 +203,7 @@ import dashboard from "@/pages/main/dashboard.vue";
 import Cookies from "js-cookie";
 
 var topicsRef;
+var gradesRef;
 
 export default {
   name: "home_screen",
@@ -147,24 +217,25 @@ export default {
   data() {
     return {
       tab: null,
-      filterData: null,
+      filterTopic: null,
+      filterGrade: null,
       items: ["Dashboard", "Videos", "Tests", "Tutes"],
+      gradesList: [],
+      gradesListData: [],
+      gradesListWithoutAll: [],
       topicList: [],
-      // drawerItems: [
-      //   // { title: "Dashboard", icon: "mdi-view-dashboard", to: "/dashboard" },
-      //   // { title: "Profile", icon: "mdi-account-circle", to: "/user/profile" },
-      // ],
-      // topicListData: [],
       drawer: false,
       loading: false,
-      show: false,
+      workingGrade: "",
       filterDialog: false,
+      wgDialog: false,
     };
   },
   beforeCreate() {
     this.$store.commit("systemUser/findUserData");
   },
   mounted() {
+    gradesRef = this.$fire.firestore.collection("grades");
     topicsRef = this.$fire.firestore.collection("topics");
     this.initialize();
   },
@@ -172,8 +243,10 @@ export default {
     userName() {
       return this.$store.getters["systemUser/userData"]?.name;
     },
-    userData() {
-      return this.$store.getters["systemUser/userData"];
+  },
+  watch: {
+    wgData() {
+      this.initTpics();
     },
   },
   methods: {
@@ -199,11 +272,36 @@ export default {
         this.$store.dispatch("alertState/message", [error, "error"]);
       }
     },
-    initialize() {
+    async initialize() {
+      try {
+        this.loading = true;
+        await gradesRef.onSnapshot(
+          { includeMetadataChanges: true },
+          (querySnapshot) => {
+            this.gradesList = [];
+            this.gradesListData = [];
+            this.gradesListWithoutAll = [];
+            this.gradesList.push("All");
+            querySnapshot.docs.forEach((doc) => {
+              this.gradesList.push(doc.data()["grade"]);
+              this.gradesListData.push(doc.data());
+              this.gradesListWithoutAll.push(doc.data()["grade"]);
+            });
+            this.loading = false;
+            this.openWgDialog();
+          }
+        );
+      } catch (error) {
+        console.log(error);
+        this.loading = false;
+      }
+    },
+
+    initTpics() {
       try {
         this.loading = true;
         topicsRef
-          .where("grade", "==", this.userData?.grade)
+          .where("grade_id", "==", this.wgData.wg_id)
           .where("subject", "==", this.userData?.subject)
           .onSnapshot({ includeMetadataChanges: true }, (querySnapshot) => {
             this.topicList = [];
@@ -220,8 +318,30 @@ export default {
         this.loading = false;
       }
     },
+    openWgDialog() {
+      var value = this.wData;
+      if (value == null || value == "") this.wgDialog = true;
+      this.workingGrade = value?.wg;
+    },
+    saveWG() {
+      // Filter
+      var filterData = this.gradesListData.find(
+        (element) => element.grade == this.workingGrade
+      );
+
+      this.$store.commit("wg/updateWG", {
+        wg: filterData.grade,
+        wg_id: filterData.id,
+      });
+
+      this.$store.dispatch("alertState/message", [
+        "Working Grade saved successfully.",
+        "success",
+      ]);
+      this.wgDialog = false;
+    },
     filterCommit() {
-      this.$store.commit("filter/filter", this.filterData);
+      this.$store.commit("filter/filter", [this.filterGrade, this.filterTopic]);
     },
   },
 };

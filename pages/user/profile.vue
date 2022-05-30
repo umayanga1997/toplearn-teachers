@@ -73,9 +73,7 @@ export default {
     teachersRef = this.$fire.firestore.collection("teachers");
   },
   computed: {
-    userData() {
-      return this.$store.getters["systemUser/userData"];
-    },
+    
   },
   watch: {
     userData(value) {
@@ -132,8 +130,8 @@ export default {
                       name: this.name,
                       isAuth: true,
                       email: user.email,
-                      grade_id: this.userData.grade_id,
-                      grade: this.userData.grade,
+                      // grade_id: this.wgData.wg_id,
+                      // grade: this.wgData.wg,
                       subject_id: this.userData.subject_id,
                       subject: this.userData.subject,
                       medium: this.userData.medium,

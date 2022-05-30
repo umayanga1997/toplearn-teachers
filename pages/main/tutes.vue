@@ -197,9 +197,6 @@ export default {
     formTitle() {
       return this.editedIndex === -1 ? "New" : "Edit";
     },
-    userData() {
-      return this.$store.getters["systemUser/userData"];
-    },
   },
 
   watch: {
@@ -210,8 +207,10 @@ export default {
     filterValue(value) {
       this.items = this.filtering(value, this.originalItems);
     },
+    wgData() {
+      this.initTpics();
+    },
   },
-
   created() {
     tutesRef = this.$fire.firestore.collection("tutes");
     topicsRef = this.$fire.firestore.collection("topics");
@@ -233,18 +232,28 @@ export default {
               this.originalItems.push(doc.data());
             });
             // Filter Management
-            if (this.filterValue != null || this.filterValue == "")
+            if (this.filterValue != null && this.filterValue != "All")
               this.items = this.filtering(this.filterValue, this.originalItems);
             this.loading = false;
           });
+        this.initTpics();
+      } catch (error) {
+        console.log(error);
+        this.loading = false;
+      }
+    },
+    initTpics() {
+      try {
+        this.loading = true;
         topicsRef
-          .where("grade", "==", this.userData?.grade)
+          .where("grade_id", "==", this.wgData.wg_id)
           .where("subject", "==", this.userData?.subject)
           .onSnapshot({ includeMetadataChanges: true }, (querySnapshot) => {
             this.topicList = [];
             querySnapshot.docs.forEach((doc) => {
               this.topicList.push(doc.data()["topic"]);
             });
+            this.loading = false;
           });
       } catch (error) {
         console.log(error);
@@ -286,6 +295,11 @@ export default {
             "Please enter Note File",
             "error",
           ]);
+        } else if (this.wgData == null) {
+          this.$store.dispatch("alertState/message", [
+            "Please select Working Grade.",
+            "error",
+          ]);
         } else {
           this.btnLoading = true;
           var id = uuid();
@@ -298,8 +312,8 @@ export default {
             .doc(id)
             .set({
               id: id,
-              grade_id: this.userData.grade_id,
-              grade: this.userData.grade,
+              grade_id: this.wgData.wg_id,
+              grade: this.wgData.wg,
               subject_id: this.userData.subject_id,
               subject: this.userData.subject,
               teacher_id: this.userData.teacher_id,
@@ -345,6 +359,11 @@ export default {
             "Please enter Description",
             "error",
           ]);
+        } else if (this.wgData == null) {
+          this.$store.dispatch("alertState/message", [
+            "Please select Working Grade.",
+            "error",
+          ]);
         } else {
           this.btnLoading = true;
 
@@ -355,11 +374,9 @@ export default {
           tutesRef
             .doc(this.editedItem.id)
             .update({
-              // grade: userData.grade,
-              // subject: userData.subject,
-              // teacher_id: userData.teacher_id,
+              grade_id: this.wgData.wg_id,
+              grade: this.wgData.wg,
               teacher_name: this.userData.name,
-              // medium: userData.medium,
               topic: this.editedItem?.topic,
               description: this.editedItem?.description,
               price: Number(this.editedItem?.price),
