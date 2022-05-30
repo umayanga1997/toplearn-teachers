@@ -23,11 +23,11 @@
       <!-- <p class="pl-4 pr-4 mt-4 pink">Count of Sales : {{ salesCount }}</p> -->
 
       <v-container class="download-class">
-        <a :href="item.note_link" download>
+        <a :href="item.note_link" download target="__blank">
           <v-icon>mdi-download</v-icon> <span>Note</span>
         </a>
 
-        <a class="ml-5" :href="item.summary_link" download
+        <a class="ml-5" :href="item.summary_link" download target="__blank"
           ><v-icon>mdi-download</v-icon><span>Summary</span>
         </a>
       </v-container>

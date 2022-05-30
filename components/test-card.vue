@@ -19,7 +19,7 @@
 
         <v-spacer></v-spacer>
 
-        <v-btn :href="item.test_link" color="orange darken-2">
+        <v-btn :href="item.test_link" color="orange darken-2" target="__blank">
           <v-icon color="black">mdi-note-edit</v-icon>
         </v-btn>
       </v-card-actions>

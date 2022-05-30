@@ -20,6 +20,37 @@
         </v-card-title>
         <v-card-text>
           <v-container>
+            <v-row class="ma-0 pa-0 pb-1" style="align-items: end">
+              <v-progress-circular
+                v-if="pickLoad"
+                indeterminate
+                color="primary"
+              ></v-progress-circular>
+
+              <img
+                v-else
+                :src="
+                  coverImageURL != null ? coverImageURL : editedItem.cover_img
+                "
+                width="150"
+                alt="cover image"
+              />
+              <input
+                id="coverImgUpload"
+                ref="coverImgRef"
+                type="file"
+                accept="image/png, image/jpeg"
+                @change="onPickedImg"
+                hidden
+              />
+              <v-btn
+                text
+                style="text-transform: none"
+                class="green darken-2 ml-4"
+                @click="changeImage"
+                >Chose Image</v-btn
+              >
+            </v-row>
             <v-row>
               <v-col cols="12" md="6" lg="6" sm="12">
                 <v-select
@@ -137,7 +168,9 @@
 
 <script>
 import { v4 as uuid } from "uuid";
-var videosRef;
+import imageCompression from "browser-image-compression";
+
+var tutesRef;
 var topicsRef;
 var storageRefTute;
 
@@ -149,6 +182,9 @@ export default {
     loading: false,
     btnLoading: false,
     tuteFile: null,
+    pickLoad: false,
+    coverImageFile: null,
+    coverImageURL: null,
     search: "",
     topicList: [],
     items: [],
@@ -177,7 +213,7 @@ export default {
   },
 
   created() {
-    videosRef = this.$fire.firestore.collection("videos");
+    tutesRef = this.$fire.firestore.collection("tutes");
     topicsRef = this.$fire.firestore.collection("topics");
     storageRefTute = this.$fire.storage.ref("tutes/");
     this.initialize();
@@ -187,7 +223,7 @@ export default {
     initialize() {
       try {
         this.loading = true;
-        videosRef
+        tutesRef
           .where("teacher_id", "==", this.userData?.teacher_id)
           .onSnapshot({ includeMetadataChanges: true }, (querySnapshot) => {
             this.items = [];
@@ -256,8 +292,9 @@ export default {
 
           // Upload Files
           if (this.tuteFile != null) await this.uploadFiles("tutes");
+          if (this.coverImageFile != null) await this.uploadFiles("coverImage");
 
-          videosRef
+          tutesRef
             .doc(id)
             .set({
               id: id,
@@ -272,6 +309,7 @@ export default {
               description: this.editedItem?.description,
               price: Number(this.editedItem?.price),
               tute_link: this.editedItem?.tute_link,
+              cover_img: this.editedItem?.cover_img,
               create_date: new Date(),
             })
             .then(() => {
@@ -312,8 +350,9 @@ export default {
 
           // Upload Files
           if (this.tuteFile != null) await this.uploadFiles("tutes");
+          if (this.coverImageFile != null) await this.uploadFiles("coverImage");
 
-          videosRef
+          tutesRef
             .doc(this.editedItem.id)
             .update({
               // grade: userData.grade,
@@ -325,6 +364,7 @@ export default {
               description: this.editedItem?.description,
               price: Number(this.editedItem?.price),
               tute_link: this.editedItem?.tute_link,
+              cover_img: this.editedItem?.cover_img,
               last_update_date: new Date(),
             })
             .then(() => {
@@ -343,7 +383,7 @@ export default {
     deleteData() {
       try {
         this.btnLoading = true;
-        videosRef
+        tutesRef
           .doc(this.editedItem.id)
           .delete()
           .then(async () => {
@@ -352,6 +392,11 @@ export default {
               this.editedItem?.tute_link != ""
             )
               await this.deleteFiles(this.editedItem.tute_link);
+            if (
+              // this.editedItem?.cover_img == null ||
+              this.editedItem?.cover_img != ""
+            )
+              await this.deleteFiles(this.editedItem.cover_img);
           })
           .then(() => {
             this.$store.dispatch("alertState/message", [
@@ -365,6 +410,42 @@ export default {
         console.log(error);
       }
     },
+    changeImage() {
+      this.$refs.coverImgRef.value = null;
+      this.$refs.coverImgRef.click();
+    },
+    async onPickedImg(event) {
+      try {
+        this.pickLoad = true;
+
+        const file = event.target.files[0];
+        this.coverImageURL = URL.createObjectURL(file);
+        // Compression
+
+        // console.log("originalFile instanceof Blob", file instanceof Blob); // true
+        // console.log(`originalFile size ${imageFile.size / 1024 / 1024} MB`);
+
+        const options = {
+          maxSizeMB: 0.5,
+          maxWidthOrHeight: 600,
+          useWebWorker: true,
+        };
+
+        const compressedFile = await imageCompression(file, options);
+        // console.log(
+        //   "compressedFile instanceof Blob",
+        //   compressedFile instanceof Blob
+        // ); // true
+        // console.log(
+        //   `compressedFile size ${compressedFile.size / 1024 / 1024} MB`
+        // ); // smaller than maxSizeMB
+        this.coverImageFile = compressedFile;
+        this.pickLoad = false;
+      } catch (error) {
+        console.log(error);
+        this.pickLoad = false;
+      }
+    },
     async uploadFiles(fileType) {
       try {
         if (fileType === "tutes") {
@@ -376,6 +457,17 @@ export default {
             .put(this.tuteFile);
           await value.ref.getDownloadURL().then((url) => {
             this.editedItem.tute_link = url;
+          });
+        }
+        if (fileType == "coverImage") {
+          await this.deleteFiles(this.editedItem.cover_img);
+          // Upload File
+          var id = uuid();
+          const value = await storageRefTute
+            .child(`Cover_Image_${id}_${this.coverImageFile.name}`)
+            .put(this.coverImageFile);
+          await value.ref.getDownloadURL().then((url) => {
+            this.editedItem.cover_img = url;
           });
         }
       } catch (error) {
