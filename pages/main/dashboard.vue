@@ -62,6 +62,7 @@
           :headers="headers"
           :items="items"
           :search="search"
+          item-key="b_id"
           sort-by="sold_date"
         >
           <template v-slot:item.sold_date="{ item }">
