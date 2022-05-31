@@ -27,9 +27,9 @@
           :bg_color="'purple darken-3'"
         ></dashoard-card>
         <dashoard-card
-          headline="Live Classes"
-          :title="'S.Count : ' + count_of_live_class_enrolment"
-          :subtitle="'S.Amount : ' + amount_of_live_class_enrolment.toFixed(2)"
+          headline="Tutes"
+          :title="'S.Count : ' + count_of_tutes_sale"
+          :subtitle="'S.Amount : ' + amount_of_tutes_sale.toFixed(2)"
           :head_color="'yellow--text'"
           :title_color="'white--text'"
           :subtitle_color="'white--text'"
@@ -91,8 +91,8 @@ export default {
       amount_of_videos_sale: 0,
       count_of_tests_sale: 0,
       amount_of_tests_sale: 0,
-      count_of_live_class_enrolment: 0,
-      amount_of_live_class_enrolment: 0,
+      count_of_tutes_sale: 0,
+      amount_of_tutes_sale: 0,
       total_income: 0,
       headers: [
         // {
@@ -139,8 +139,8 @@ export default {
                   this.amount_of_videos_sale = 0;
                   this.count_of_tests_sale = 0;
                   this.amount_of_tests_sale = 0;
-                  this.count_of_live_class_enrolment = 0;
-                  this.amount_of_live_class_enrolment = 0;
+                  this.count_of_tutes_sale = 0;
+                  this.amount_of_tutes_sale = 0;
                   await snapshot.ref
                     .collection("sold_videos")
                     .get()
@@ -164,12 +164,12 @@ export default {
                       });
                     });
                   await snapshot.ref
-                    .collection("sold_live_classes")
+                    .collection("sold_tutes")
                     .get()
                     .then((querySnapshot) => {
                       querySnapshot.docs?.forEach((element) => {
-                        this.count_of_live_class_enrolment += 1;
-                        this.amount_of_live_class_enrolment +=
+                        this.count_of_tutes_sale += 1;
+                        this.amount_of_tutes_sale +=
                           element.data()["price"] ?? 0;
                         this.items.push(element.data());
                       });
@@ -178,7 +178,7 @@ export default {
                   this.total_income =
                     this.amount_of_videos_sale +
                     this.amount_of_tests_sale +
-                    this.amount_of_live_class_enrolment;
+                    this.amount_of_tutes_sale;
                   //
                   this.loading = false;
                 }
