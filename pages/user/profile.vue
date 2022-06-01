@@ -72,9 +72,7 @@ export default {
     this.$store.commit("systemUser/findUserData");
     teachersRef = this.$fire.firestore.collection("teachers");
   },
-  computed: {
-    
-  },
+  computed: {},
   watch: {
     userData(value) {
       this.name = value?.name;
@@ -113,7 +111,13 @@ export default {
                     "teacher_name",
                     this.userData.teacher_name
                   );
-                  await this.liveClassesUpdate(
+                  // await this.liveClassesUpdate(
+                  //   "teacher_id",
+                  //   this.userData.teacher_id,
+                  //   "teacher_name",
+                  //   this.userData.teacher_name
+                  // );
+                  await this.tutesUpdate(
                     "teacher_id",
                     this.userData.teacher_id,
                     "teacher_name",

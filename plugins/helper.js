@@ -84,5 +84,22 @@ Vue.mixin({
           });
       } catch (error) {}
     },
+    tutesUpdate(search_field, search_value, update_field, update_value) {
+      try {
+        // Object
+        var obj = {};
+        obj[update_field] = update_value;
+
+        var ref = this.$fire.firestore.collection("tutes");
+        ref
+          .where(search_field, "==", search_value)
+          .get()
+          .then((querySnapshot) => {
+            querySnapshot.docs?.forEach((snapshot) => {
+              snapshot.ref.update(obj);
+            });
+          });
+      } catch (error) {}
+    },
   },
 });
