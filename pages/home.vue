@@ -241,6 +241,9 @@ export default {
     topicsRef = this.$fire.firestore.collection("topics");
     this.initialize();
   },
+  mounted() {
+    this.openWgDialog();
+  },
   computed: {
     userName() {
       return this.$store.getters["systemUser/userData"]?.name;
@@ -290,7 +293,6 @@ export default {
               this.gradesListWithoutAll.push(doc.data()["grade"]);
             });
             this.loading = false;
-            this.openWgDialog();
           }
         );
       } catch (error) {
