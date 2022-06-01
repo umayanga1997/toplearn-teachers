@@ -132,58 +132,54 @@ export default {
           if (user) {
             teachersRef
               .doc(user.uid)
-              .onSnapshot(
-                { includeMetadataChanges: true },
-                async (snapshot) => {
-                  this.items = [];
-                  this.count_of_videos_sale = 0;
-                  this.amount_of_videos_sale = 0;
-                  this.count_of_tests_sale = 0;
-                  this.amount_of_tests_sale = 0;
-                  this.count_of_tutes_sale = 0;
-                  this.amount_of_tutes_sale = 0;
-                  await snapshot.ref
-                    .collection("sold_videos")
-                    .get()
-                    .then((querySnapshot) => {
-                      querySnapshot.docs?.forEach((element) => {
-                        this.count_of_videos_sale += 1;
-                        this.amount_of_videos_sale +=
-                          element.data()["price"] ?? 0;
-                        this.items.push(element.data());
-                      });
+              .get()
+              .then(async (snapshot) => {
+                this.items = [];
+                this.count_of_videos_sale = 0;
+                this.amount_of_videos_sale = 0;
+                this.count_of_tests_sale = 0;
+                this.amount_of_tests_sale = 0;
+                this.count_of_tutes_sale = 0;
+                this.amount_of_tutes_sale = 0;
+                await snapshot.ref
+                  .collection("sold_videos")
+                  .get()
+                  .then((querySnapshot) => {
+                    querySnapshot.docs?.forEach((element) => {
+                      this.count_of_videos_sale += 1;
+                      this.amount_of_videos_sale +=
+                        element.data()["price"] ?? 0;
+                      this.items.push(element.data());
                     });
-                  await snapshot.ref
-                    .collection("sold_tests")
-                    .get()
-                    .then((querySnapshot) => {
-                      querySnapshot.docs?.forEach((element) => {
-                        this.count_of_tests_sale += 1;
-                        this.amount_of_tests_sale +=
-                          element.data()["price"] ?? 0;
-                        this.items.push(element.data());
-                      });
+                  });
+                await snapshot.ref
+                  .collection("sold_tests")
+                  .get()
+                  .then((querySnapshot) => {
+                    querySnapshot.docs?.forEach((element) => {
+                      this.count_of_tests_sale += 1;
+                      this.amount_of_tests_sale += element.data()["price"] ?? 0;
+                      this.items.push(element.data());
                     });
-                  await snapshot.ref
-                    .collection("sold_tutes")
-                    .get()
-                    .then((querySnapshot) => {
-                      querySnapshot.docs?.forEach((element) => {
-                        this.count_of_tutes_sale += 1;
-                        this.amount_of_tutes_sale +=
-                          element.data()["price"] ?? 0;
-                        this.items.push(element.data());
-                      });
+                  });
+                await snapshot.ref
+                  .collection("sold_tutes")
+                  .get()
+                  .then((querySnapshot) => {
+                    querySnapshot.docs?.forEach((element) => {
+                      this.count_of_tutes_sale += 1;
+                      this.amount_of_tutes_sale += element.data()["price"] ?? 0;
+                      this.items.push(element.data());
                     });
-                  // Calculate full amount
-                  this.total_income =
-                    this.amount_of_videos_sale +
-                    this.amount_of_tests_sale +
-                    this.amount_of_tutes_sale;
-                  //
-                  this.loading = false;
-                }
-              );
+                  });
+                // Calculate full amount
+                this.total_income =
+                  this.amount_of_videos_sale +
+                  this.amount_of_tests_sale +
+                  this.amount_of_tutes_sale;
+                //
+                this.loading = false;
+              });
           }
         });
       } catch (error) {
